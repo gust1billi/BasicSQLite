@@ -1,12 +1,29 @@
 package com.example.basicsqlite.rv;
 
 public class Data {
-    String title, desc; int num;
+    String id, title, desc; int num;
 
     public Data(String title, String desc, int num) {
         this.title = title;
         this.desc = desc;
         this.num = num;
+        this.id = String.valueOf(num);
+        //  this.id = null;
+    }
+
+    public Data(String id, String title, String desc, int num) {
+        this.id = id;
+        this.title = title;
+        this.desc = desc;
+        this.num = num;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getTitle() {

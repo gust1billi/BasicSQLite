@@ -46,7 +46,7 @@ public class InsertDataActivity extends AppCompatActivity {
                             editData.getText().toString(),
                             Integer.parseInt( editNumber.getText().toString() ) );
                 }
-                
+
             }
         });
 
