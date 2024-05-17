@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     DatabaseHelper myDB;
     List<Data> data;
 
-    int pointer;
+    int pointer; boolean updateGate = false;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -72,7 +72,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, InsertDataActivity.class);
-                startActivity(intent);
+                intent.putExtra("key", updateGate);
+                nextActivity(intent);
             }
         });
 
@@ -83,12 +84,25 @@ public class MainActivity extends AppCompatActivity {
 
         mainRV = findViewById(R.id.mainRecyclerView);
 
-        data = new ArrayList<>(); populateData(); checkData();
+        data = new ArrayList<>(); // populateData();
+        checkData();
         adapter = new DataRVAdapter(MainActivity.this, data);
 //        layoutManager = new GridLayoutManager(MainActivity.this, 2);
         layoutManager = new LinearLayoutManager(MainActivity.this);
 
         mainRV.setAdapter(adapter); mainRV.setLayoutManager(layoutManager);
+    }
+
+    public void nextActivity(Intent intent) {
+        startActivity(intent);
+    }
+
+    public void setUpdateGate(boolean key){
+        updateGate = key;
+    }
+
+    public boolean getUpdateGate(){
+        return updateGate;
     }
 
     private void populateData() {
@@ -150,5 +164,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume(); adapter.notifyDataSetChanged();
+
+        if(updateGate){
+            setUpdateGate(false);
+            Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
+        }
     }
 }

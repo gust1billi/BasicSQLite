@@ -1,14 +1,18 @@
 package com.example.basicsqlite.rv;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.basicsqlite.InsertDataActivity;
+import com.example.basicsqlite.MainActivity;
 import com.example.basicsqlite.R;
 
 import java.util.List;
@@ -41,6 +45,20 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
         if (holder.id.getText( ) != null){
             holder.id.setText( data.getId( ) );
         } else holder.id.setText("");
+
+        holder.itemView.setOnClickListener(view -> {
+            Toast.makeText(ctx, "Num: " + holder.num.getText(), Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(ctx, InsertDataActivity.class);
+            ((MainActivity)ctx).setUpdateGate(true);
+
+            i.putExtra("key", ((MainActivity)ctx).getUpdateGate() );
+            i.putExtra("title", holder.title.getText() );
+            i.putExtra("data", holder.desc.getText() );
+            i.putExtra("num", holder.num.getText() );
+            i.putExtra("position", position );
+
+            ((MainActivity)ctx).nextActivity(i);
+        });
     }
 
     @Override

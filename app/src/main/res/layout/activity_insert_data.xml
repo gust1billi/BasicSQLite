@@ -67,7 +67,7 @@
         tools:ignore="HardcodedText" />
 
     <Button
-        android:id="@+id/addBtn"
+        android:id="@+id/actionButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="30dp"
