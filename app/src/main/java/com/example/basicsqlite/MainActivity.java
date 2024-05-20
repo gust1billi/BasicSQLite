@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity {
     DatabaseHelper myDB;
     List<Data> data;
 
-    int pointer; boolean updateGate = false;
+    int pointer; boolean updateGate = false; boolean key = false;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -84,8 +84,8 @@ public class MainActivity extends AppCompatActivity {
 
         mainRV = findViewById(R.id.mainRecyclerView);
 
-        data = new ArrayList<>(); // populateData();
-        checkData();
+        data = new ArrayList<>();
+
         adapter = new DataRVAdapter(MainActivity.this, data);
 //        layoutManager = new GridLayoutManager(MainActivity.this, 2);
         layoutManager = new LinearLayoutManager(MainActivity.this);
@@ -105,18 +105,8 @@ public class MainActivity extends AppCompatActivity {
         return updateGate;
     }
 
-    private void populateData() {
-        // Dummy Data
-        data.add(new Data("Judul", "Isi", 1));
-        data.add(new Data("Judul", "Isi", 2));
-        data.add(new Data("Judul", "Isi", 3));
-        data.add(new Data("Judul", "Isi", 4));
-        data.add(new Data("Judul", "Isi", 5));
-        data.add(new Data("Judul", "Isi", 6));
-        data.add(new Data("Judul", "Isi", 7));
-        data.add(new Data("Judul", "Isi", 8));
-        data.add(new Data("Judul", "Isi", 9));
-        data.add(new Data("Judul", "Isi", 10));
+    public void setPointer(int position){
+        pointer = position;
     }
 
     private void checkData(){
@@ -132,17 +122,6 @@ public class MainActivity extends AppCompatActivity {
                     cursor.getString(2),
                     cursor.getInt(3)));
         }
-
-//        if (cursor.getCount() == 0){
-//            Toast.makeText(MainActivity.this, "Empty Data Storage", Toast.LENGTH_SHORT).show();
-//        } else {
-//            data.add(new Data(
-//                    cursor.getString(0),
-//                    cursor.getString(1),
-//                    cursor.getString(2),
-//                    cursor.getInt(3)));
-//            adapter.notifyItemInserted(data.size()-1 );
-//        }
 
         // WILL HAVE DUPLICATED DATA ERROR, TABLE IS ALWAYS READ ALL;
         // TEMP SOLUTION, CLEAR THEN RE ADD
@@ -163,11 +142,11 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        super.onResume(); adapter.notifyDataSetChanged();
+        super.onResume(); checkData();
 
         if(updateGate){
-            setUpdateGate(false);
-            Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
-        }
+            setUpdateGate(false); adapter.notifyItemChanged(pointer);
+//            Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
+        } else adapter.notifyDataSetChanged();
     }
 }

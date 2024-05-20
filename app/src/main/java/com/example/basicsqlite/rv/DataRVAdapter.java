@@ -50,11 +50,13 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
             Toast.makeText(ctx, "Num: " + holder.num.getText(), Toast.LENGTH_SHORT).show();
             Intent i = new Intent(ctx, InsertDataActivity.class);
             ((MainActivity)ctx).setUpdateGate(true);
+            ((MainActivity) ctx).setPointer(position);
 
             i.putExtra("key", ((MainActivity)ctx).getUpdateGate() );
             i.putExtra("title", holder.title.getText() );
             i.putExtra("data", holder.desc.getText() );
             i.putExtra("num", holder.num.getText() );
+            i.putExtra("id", holder.id.getText() );
             i.putExtra("position", position );
 
             ((MainActivity)ctx).nextActivity(i);

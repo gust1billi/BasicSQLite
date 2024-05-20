@@ -43,13 +43,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    public void updateData(String row_id, String title, String data, int num){
+        SQLiteDatabase db = DatabaseHelper.this.getWritableDatabase();
+        ContentValues values = assignTable(title, data, num);
+
+        long result = db.update(TABLE_NAME, values, "_id=?", new String[]{row_id});
+
+        if (result == -1){ Toast.makeText(ctx, "Failed to Update", Toast.LENGTH_SHORT).show();
+        } else Toast.makeText(ctx, "Successfully updates", Toast.LENGTH_SHORT).show();
+    }
+
     public void addData(String title, String data, int number){
         SQLiteDatabase db = DatabaseHelper.this.getWritableDatabase();
-        ContentValues values = new ContentValues();
+        ContentValues values = assignTable(title, data, number);
 
-        values.put(COLUMN_TITLE, title);
-        values.put(COLUMN_DATA, data);
-        values.put(COLUMN_NUMBER, number);
         long result = db.insert(TABLE_NAME, null, values);
 
         String callback;
@@ -69,5 +76,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             cursor = db.rawQuery(query, null);
         }
         return cursor;
+    }
+
+    private ContentValues assignTable(String title, String data, int number){
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_NUMBER, number);
+        values.put(COLUMN_TITLE, title);
+        values.put(COLUMN_DATA, data);
+        return values;
     }
 }

@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">BasicSQLite</string>
     <string name="insertData">Inserts New Data to DB</string>
+    <string name="update">Update</string>
 </resources>

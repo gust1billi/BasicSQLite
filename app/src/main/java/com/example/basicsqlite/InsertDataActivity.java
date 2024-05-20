@@ -15,6 +15,8 @@ public class InsertDataActivity extends AppCompatActivity {
     EditText editTitle, editData, editNumber;
     Button actionBtn;
 
+    boolean key = false; String id;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,6 +29,8 @@ public class InsertDataActivity extends AppCompatActivity {
         editNumber = findViewById(R.id.addNumber);
         actionBtn = findViewById(R.id.actionButton);
 
+        whenUpdate(); // Adds the data from the card clicked to the editText on this Layout
+
         actionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -35,21 +39,41 @@ public class InsertDataActivity extends AppCompatActivity {
                         || editNumber.getText().length() == 0){
                     Toast.makeText(InsertDataActivity.this, "Input Data Required", Toast.LENGTH_SHORT).show();
                 } else {
-                    myDB.addData(
-                            editTitle.getText().toString(),
-                            editData.getText().toString(),
-                            Integer.parseInt( editNumber.getText().toString() ) );
+                    if (key){
+                        key = false;
+
+                        myDB.updateData(
+                                id,
+                                editTitle.getText().toString(),
+                                editData.getText().toString(),
+                                Integer.parseInt( editNumber.getText().toString())
+                        );
+
+                    }else {
+                        myDB.addData(
+                                editTitle.getText().toString(),
+                                editData.getText().toString(),
+                                Integer.parseInt( editNumber.getText().toString() ) );
+                    }
                 }
 
             }
         });
 
+    }
+
+    // Adds the data from the card clicked to the editText on this Layout
+    private void whenUpdate() {
         Bundle extras = getIntent().getExtras();
         if (extras.getBoolean("key") ){
-            editNumber.setText( extras.getString("num") );
-            editData.setText(extras.getString("data"));
-            editTitle.setText(extras.getString("title"));
-        }
+            key = true;
 
+            editNumber.setText( extras.getString("num") );
+            editTitle.setText(extras.getString("title"));
+            editData.setText(extras.getString("data"));
+            id = extras.getString("id");
+
+            actionBtn.setText(R.string.update);
+        }
     }
 }
