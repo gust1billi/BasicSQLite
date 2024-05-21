@@ -100,6 +100,8 @@ public class InsertDataActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 DatabaseHelper myDB = new DatabaseHelper(InsertDataActivity.this);
                 myDB.deleteOneRow(id);
+
+                actionBtn.setVisibility(View.INVISIBLE);
             }
         });
 

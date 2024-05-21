@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -34,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
     DatabaseHelper myDB;
     List<Data> data;
 
-    int pointer; boolean updateGate = false; boolean key = false;
+    int pointer; boolean updateGate = false;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -52,10 +54,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (item.getTitleCondensed().equals("pop")){
             Toast.makeText(MainActivity.this, "POP!", Toast.LENGTH_SHORT).show();
 
-            myDB.popLastRow( myDB.getReadableDatabase() , adapter, pointer );
-
-//            adapter.notifyItemRemoved( pointer );
-//            adapter.notifyItemRangeRemoved(pointer, cursor.getCount( ) );
+//            ClearLastItem.execute( );
+            myDB.popLastRow( myDB.getReadableDatabase() );
+            checkData(); adapter.popLastItem(pointer);
 
         } else if (item.getTitleCondensed().equals("prune" ) ){
             for (int i = 0; i < pointer; i++) {
@@ -131,11 +132,33 @@ public class MainActivity extends AppCompatActivity {
         pointer = position;
     }
 
+//    class ClearLastItem extends AsyncTask<Void, Void, Boolean>{
+//        private DatabaseHelper myDB;
+//
+//        @Override
+//        protected Boolean doInBackground(Void... voids) {
+//            myDB.popLastRow(myDB.getReadableDatabase());
+//            return true;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Boolean aBoolean) {
+//            super.onPostExecute(aBoolean);
+//
+//            adapter.popLastItem(pointer);
+////            try {
+////                this.finalize();
+////            } catch (Throwable e) {
+////                e.printStackTrace();
+////            }
+//        }
+//    }
+
     private void checkData(){
         Cursor cursor = myDB.readAllData(); // Reads all of SQLite data in 1 table
         pointer = cursor.getCount(); data.clear();
 //        Toast.makeText(MainActivity.this, "size: " + cursor.getCount(), Toast.LENGTH_SHORT).show();
-        Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
+//        Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
 
         while (cursor.moveToNext()){
             data.add(new Data(
@@ -144,7 +167,6 @@ public class MainActivity extends AppCompatActivity {
                     cursor.getString(2),
                     cursor.getInt(3)));
         }
-
         // WILL HAVE DUPLICATED DATA ERROR, TABLE IS ALWAYS READ ALL;
         // TEMP SOLUTION, CLEAR THEN RE ADD
     }

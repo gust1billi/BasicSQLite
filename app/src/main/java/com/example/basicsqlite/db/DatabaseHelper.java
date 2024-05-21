@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.os.AsyncTask;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
@@ -44,15 +45,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(db);
     }
-    public void popLastRow(SQLiteDatabase db, DataRVAdapter rvAdapter, int position){
+
+    public void popLastRow(SQLiteDatabase db){
         db.execSQL("DELETE FROM " + TABLE_NAME
                 + " WHERE " + COLUMN_ID + " = "
                 + "(SELECT MAX(" + COLUMN_ID
                 + ") FROM " + TABLE_NAME + ");"
         );
 
-        DataRVAdapter adapter = rvAdapter;
-        adapter.popLastItem(position);
+//        DataRVAdapter adapter = rvAdapter;
+        // adapter.popLastItem(position);
     }
 
     public void updateData(String row_id, String title, String data, int num){
@@ -106,5 +108,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_DATA, data);
         return values;
     }
-
 }
