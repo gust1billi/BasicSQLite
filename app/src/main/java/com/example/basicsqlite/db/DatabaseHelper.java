@@ -9,6 +9,8 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
+import com.example.basicsqlite.rv.DataRVAdapter;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private final Context ctx;
@@ -41,6 +43,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
         db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
         onCreate(db);
+    }
+    public void popLastRow(SQLiteDatabase db, DataRVAdapter rvAdapter, int position){
+        db.execSQL("DELETE FROM " + TABLE_NAME
+                + " WHERE " + COLUMN_ID + " = "
+                + "(SELECT MAX(" + COLUMN_ID
+                + ") FROM " + TABLE_NAME + ");"
+        );
+
+        DataRVAdapter adapter = rvAdapter;
+        adapter.popLastItem(position);
     }
 
     public void updateData(String row_id, String title, String data, int num){
@@ -78,6 +90,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return cursor;
     }
 
+    public void deleteOneRow(String row_id){
+        SQLiteDatabase db = this.getWritableDatabase();
+        long result = db.delete(TABLE_NAME, "_id=?", new String[]{row_id} );
+
+        if (result == -1){
+            Toast.makeText(ctx, "Failed to Delete", Toast.LENGTH_SHORT).show();
+        } else Toast.makeText(ctx, "Successfully Deleted", Toast.LENGTH_SHORT).show();
+    }
+
     private ContentValues assignTable(String title, String data, int number){
         ContentValues values = new ContentValues();
         values.put(COLUMN_NUMBER, number);
@@ -85,4 +106,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_DATA, data);
         return values;
     }
+
 }

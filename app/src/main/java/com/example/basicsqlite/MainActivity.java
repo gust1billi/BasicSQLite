@@ -45,19 +45,31 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        Cursor cursor = myDB.readAllData(); pointer = cursor.getCount();
 
         if (item.getTitleCondensed().equals("hi") ) {
             Toast.makeText(MainActivity.this, "Hello World!" , Toast.LENGTH_SHORT).show();
         } else if (item.getTitleCondensed().equals("pop")){
             Toast.makeText(MainActivity.this, "POP!", Toast.LENGTH_SHORT).show();
+
+            myDB.popLastRow( myDB.getReadableDatabase() , adapter, pointer );
+
+//            adapter.notifyItemRemoved( pointer );
+//            adapter.notifyItemRangeRemoved(pointer, cursor.getCount( ) );
+
         } else if (item.getTitleCondensed().equals("prune" ) ){
             for (int i = 0; i < pointer; i++) {
                 data.remove( data.size() - 1 );
                 adapter.notifyItemRemoved(data.size());
             }
+
             myDB.onUpgrade(myDB.getReadableDatabase(), 0, 0);
-            checkData();
+            for (int i = 0; i < pointer; i++) {
+                adapter.notifyItemRemoved(i);
+            }
         }
+
+        cursor.close();
 
         return super.onOptionsItemSelected(item);
     }
@@ -91,7 +103,17 @@ public class MainActivity extends AppCompatActivity {
         layoutManager = new LinearLayoutManager(MainActivity.this);
 
         mainRV.setAdapter(adapter); mainRV.setLayoutManager(layoutManager);
-    }
+    } // ON CREATE
+
+    @Override
+    protected void onResume() {
+        super.onResume(); checkData();
+
+        if(updateGate){
+            setUpdateGate(false); adapter.notifyItemChanged(pointer);
+//            Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
+        } else adapter.notifyDataSetChanged();
+    } // ON RESUME
 
     public void nextActivity(Intent intent) {
         startActivity(intent);
@@ -111,9 +133,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkData(){
         Cursor cursor = myDB.readAllData(); // Reads all of SQLite data in 1 table
-
-        Toast.makeText(MainActivity.this, "size: " + cursor.getCount(), Toast.LENGTH_SHORT).show();
-        pointer = cursor.getCount();
+        pointer = cursor.getCount(); data.clear();
+//        Toast.makeText(MainActivity.this, "size: " + cursor.getCount(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
 
         while (cursor.moveToNext()){
             data.add(new Data(
@@ -127,8 +149,6 @@ public class MainActivity extends AppCompatActivity {
         // TEMP SOLUTION, CLEAR THEN RE ADD
     }
 
-
-
     //    private void backBtn(){
 //        toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24);
 //        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
@@ -138,15 +158,4 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 //    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume(); checkData();
-
-        if(updateGate){
-            setUpdateGate(false); adapter.notifyItemChanged(pointer);
-//            Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
-        } else adapter.notifyDataSetChanged();
-    }
 }

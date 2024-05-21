@@ -1,11 +1,14 @@
 package com.example.basicsqlite;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.basicsqlite.db.DatabaseHelper;
@@ -13,6 +16,7 @@ import com.example.basicsqlite.db.DatabaseHelper;
 public class InsertDataActivity extends AppCompatActivity {
 
     EditText editTitle, editData, editNumber;
+    ImageView deleteBtn;
     Button actionBtn;
 
     boolean key = false; String id;
@@ -28,8 +32,21 @@ public class InsertDataActivity extends AppCompatActivity {
         editData = findViewById(R.id.addData);
         editNumber = findViewById(R.id.addNumber);
         actionBtn = findViewById(R.id.actionButton);
+        deleteBtn = findViewById(R.id.deleteBtn); deleteBtn.setVisibility(View.INVISIBLE);
 
-        whenUpdate(); // Adds the data from the card clicked to the editText on this Layout
+        deleteBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                confirmDeleteDialog();
+            }
+        });
+
+        whenUpdate();
+        /** Checks if the Activity is called by FAB or by View Holder of Recycler View
+         * Adds the data from the card clicked to the editText on this Layout
+         * Changes the Button word from Add Data to Update Data
+         * Checks the Key Value and gatekeeps the result
+        * */
 
         actionBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -40,33 +57,30 @@ public class InsertDataActivity extends AppCompatActivity {
                     Toast.makeText(InsertDataActivity.this, "Input Data Required", Toast.LENGTH_SHORT).show();
                 } else {
                     if (key){
-                        key = false;
-
-                        myDB.updateData(
+                        key = false; myDB.updateData(
                                 id,
                                 editTitle.getText().toString(),
                                 editData.getText().toString(),
                                 Integer.parseInt( editNumber.getText().toString())
                         );
 
-                    }else {
+                    } else {
                         myDB.addData(
                                 editTitle.getText().toString(),
                                 editData.getText().toString(),
                                 Integer.parseInt( editNumber.getText().toString() ) );
                     }
-                }
+                } // ELIF
+            } // ON CLICK
+        }); // ACTION BUTTON ON-CLICK-LISTENER
 
-            }
-        });
-
-    }
+    } // ON-CREATE INSERT-DATA-ACTIVITY
 
     // Adds the data from the card clicked to the editText on this Layout
     private void whenUpdate() {
         Bundle extras = getIntent().getExtras();
-        if (extras.getBoolean("key") ){
-            key = true;
+        if (extras.getBoolean("key") ){ key = true;
+            deleteBtn.setVisibility(View.VISIBLE);
 
             editNumber.setText( extras.getString("num") );
             editTitle.setText(extras.getString("title"));
@@ -75,5 +89,23 @@ public class InsertDataActivity extends AppCompatActivity {
 
             actionBtn.setText(R.string.update);
         }
+    } // WHEN UPDATES
+
+    private void confirmDeleteDialog(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(InsertDataActivity.this);
+        builder.setTitle("Delete " + editTitle.getText() + "?");
+        builder.setTitle("Are you sure that you want to Delete" + editTitle.getText() + "?");
+        builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                DatabaseHelper myDB = new DatabaseHelper(InsertDataActivity.this);
+                myDB.deleteOneRow(id);
+            }
+        });
+
+        builder.setNegativeButton("No", (dialogInterface, i) -> { });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
     }
 }

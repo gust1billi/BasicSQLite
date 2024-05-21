@@ -68,6 +68,11 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
         return database.size();
     }
 
+    public void popLastItem(int position) {
+        notifyItemRemoved( position );
+        notifyItemRangeRemoved( position, position );
+    }
+
     public static class DataViewHolder extends RecyclerView.ViewHolder {
         TextView id, title, desc, num;
 
