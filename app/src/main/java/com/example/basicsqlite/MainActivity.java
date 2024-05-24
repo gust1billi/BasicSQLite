@@ -1,7 +1,13 @@
 package com.example.basicsqlite;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContract;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,16 +33,15 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-//    Toolbar toolbar;
     FloatingActionButton addBtn;
 
     RecyclerView mainRV; DataRVAdapter adapter; LinearLayoutManager layoutManager;
-//    GridLayoutManager layoutManager;
 
     DatabaseHelper myDB;
     List<Data> data;
 
-    int pointer; boolean updateGate = false;
+    int pointer;
+    boolean addGate = false; boolean updateGate = false;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -49,31 +54,57 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Cursor cursor = myDB.readAllData(); pointer = cursor.getCount();
 
-        if (item.getTitleCondensed().equals("hi") ) {
+        if ( item.getItemId() == R.id.menu_hello ) {
             Toast.makeText(MainActivity.this, "Hello World!" , Toast.LENGTH_SHORT).show();
         } else if (item.getTitleCondensed().equals("pop")){
             Toast.makeText(MainActivity.this, "POP!", Toast.LENGTH_SHORT).show();
 
-//            ClearLastItem.execute( );
-            myDB.popLastRow( myDB.getReadableDatabase() );
-            checkData(); adapter.popLastItem(pointer);
-
-        } else if (item.getTitleCondensed().equals("prune" ) ){
-            for (int i = 0; i < pointer; i++) {
-                data.remove( data.size() - 1 );
-                adapter.notifyItemRemoved(data.size());
-            }
-
-            myDB.onUpgrade(myDB.getReadableDatabase(), 0, 0);
-            for (int i = 0; i < pointer; i++) {
-                adapter.notifyItemRemoved(i);
-            }
+            if (data.size()>12){
+                myDB.popLastRow( myDB.getReadableDatabase() );
+                checkData(); adapter.popLastItem(pointer);
+            } else Toast.makeText(MainActivity.this,
+                    "Admin Data - Cannot Delete", Toast.LENGTH_SHORT).show();
         }
+//        else if (item.getTitleCondensed().equals("prune" ) ){
+//            for (int i = 0; i < pointer; i++) {
+//                data.remove( data.size() - 1 );
+//                adapter.notifyItemRemoved(data.size());
+//            }
+//
+//            myDB.onUpgrade(myDB.getReadableDatabase(), 0, 0);
+//            for (int i = 0; i < pointer; i++) {
+//                adapter.notifyItemRemoved(i);
+//            }
+//        }
 
         cursor.close();
 
         return super.onOptionsItemSelected(item);
     }
+
+    ActivityResultLauncher<Intent> nextActivityLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result) {
+                    Intent resultData = result.getData();
+                    assert resultData != null;
+
+                    checkData();
+
+                    if(updateGate){
+                        setUpdateGate(false); adapter.notifyItemChanged(pointer);
+//                      Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
+                    } else if (addGate){
+                        addGate = false; adapter.notifyItemInserted(data.size() - 1 );
+                    } else if (resultData.getBooleanExtra("deleteGate", false) ){
+                        adapter.notifyItemRemoved(
+                                resultData.getIntExtra("position", 0) );
+                    }
+                    // else adapter.notifyDataSetChanged();
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,18 +117,14 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, InsertDataActivity.class);
                 intent.putExtra("key", updateGate);
-                nextActivity(intent);
+                addGate = true;
+
+                openNextActivity(intent);
             }
         });
-
-//        getActionBar().hide();
-//        toolbar = (Toolbar) findViewById(R.id.toolbar); setSupportActionBar(toolbar);
-
         myDB = new DatabaseHelper(MainActivity.this);
 
-        mainRV = findViewById(R.id.mainRecyclerView);
-
-        data = new ArrayList<>();
+        mainRV = findViewById(R.id.mainRecyclerView);  data = new ArrayList<>();
 
         adapter = new DataRVAdapter(MainActivity.this, data);
 //        layoutManager = new GridLayoutManager(MainActivity.this, 2);
@@ -109,15 +136,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume(); checkData();
+    }
 
-        if(updateGate){
-            setUpdateGate(false); adapter.notifyItemChanged(pointer);
-//            Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
-        } else adapter.notifyDataSetChanged();
-    } // ON RESUME
-
-    public void nextActivity(Intent intent) {
-        startActivity(intent);
+    public void openNextActivity(Intent intent){
+        nextActivityLauncher.launch(intent);
     }
 
     public void setUpdateGate(boolean key){
@@ -131,28 +153,6 @@ public class MainActivity extends AppCompatActivity {
     public void setPointer(int position){
         pointer = position;
     }
-
-//    class ClearLastItem extends AsyncTask<Void, Void, Boolean>{
-//        private DatabaseHelper myDB;
-//
-//        @Override
-//        protected Boolean doInBackground(Void... voids) {
-//            myDB.popLastRow(myDB.getReadableDatabase());
-//            return true;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Boolean aBoolean) {
-//            super.onPostExecute(aBoolean);
-//
-//            adapter.popLastItem(pointer);
-////            try {
-////                this.finalize();
-////            } catch (Throwable e) {
-////                e.printStackTrace();
-////            }
-//        }
-//    }
 
     private void checkData(){
         Cursor cursor = myDB.readAllData(); // Reads all of SQLite data in 1 table
@@ -171,13 +171,4 @@ public class MainActivity extends AppCompatActivity {
         // TEMP SOLUTION, CLEAR THEN RE ADD
     }
 
-    //    private void backBtn(){
-//        toolbar.setNavigationIcon(R.drawable.ic_baseline_arrow_back_24);
-//        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                finish();
-//            }
-//        });
-//    }
 }

@@ -4,6 +4,7 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -19,7 +20,7 @@ public class InsertDataActivity extends AppCompatActivity {
     ImageView deleteBtn;
     Button actionBtn;
 
-    boolean key = false; String id;
+    boolean key = false; String id; int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,13 +64,13 @@ public class InsertDataActivity extends AppCompatActivity {
                                 editData.getText().toString(),
                                 Integer.parseInt( editNumber.getText().toString())
                         );
-
                     } else {
                         myDB.addData(
                                 editTitle.getText().toString(),
                                 editData.getText().toString(),
                                 Integer.parseInt( editNumber.getText().toString() ) );
-                    }
+                    } // Add or Update Button ELIF
+                    finish();
                 } // ELIF
             } // ON CLICK
         }); // ACTION BUTTON ON-CLICK-LISTENER
@@ -86,6 +87,7 @@ public class InsertDataActivity extends AppCompatActivity {
             editTitle.setText(extras.getString("title"));
             editData.setText(extras.getString("data"));
             id = extras.getString("id");
+            position = extras.getInt("position");
 
             actionBtn.setText(R.string.update);
         }
@@ -98,8 +100,16 @@ public class InsertDataActivity extends AppCompatActivity {
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
-                DatabaseHelper myDB = new DatabaseHelper(InsertDataActivity.this);
-                myDB.deleteOneRow(id);
+                if (Integer.parseInt(id) > 22){
+                    DatabaseHelper myDB = new DatabaseHelper(InsertDataActivity.this);
+                    myDB.deleteOneRow(id);
+
+                    Intent intent = new Intent(InsertDataActivity.this, MainActivity.class);
+                    intent.putExtra("deleteGate", true);
+                    intent.putExtra("position", position);
+
+                    finish();
+                } else Toast.makeText(InsertDataActivity.this, "Admin Data; Cannot delete", Toast.LENGTH_SHORT).show();
 
                 actionBtn.setVisibility(View.INVISIBLE);
             }
@@ -109,5 +119,5 @@ public class InsertDataActivity extends AppCompatActivity {
 
         AlertDialog dialog = builder.create();
         dialog.show();
-    }
+    } // DIALOG BOX INFO
 }

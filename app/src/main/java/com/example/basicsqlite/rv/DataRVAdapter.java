@@ -59,7 +59,7 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
             i.putExtra("id", holder.id.getText() );
             i.putExtra("position", position );
 
-            ((MainActivity)ctx).nextActivity(i);
+            ((MainActivity)ctx).openNextActivity(i);
         });
     }
 
