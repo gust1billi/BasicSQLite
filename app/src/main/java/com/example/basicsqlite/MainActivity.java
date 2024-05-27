@@ -113,6 +113,22 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        searchBtn = findViewById(R.id.menu_search); searchBtn.setQueryHint("Filter Data by Title");
+        searchBtn.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String filter) {
+                if (filter.length() == 0){
+                    checkData();
+                } else filterData( filter );
+                return false;
+            }
+        });
+
         addBtn = findViewById(R.id.floatingAddBtn);
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,6 +150,17 @@ public class MainActivity extends AppCompatActivity {
 
         mainRV.setAdapter(adapter); mainRV.setLayoutManager(layoutManager);
     } // ON CREATE
+
+    private void filterData(String filter) {
+        List<Data> filteredList = new ArrayList<>();
+        for (Data filteredDataPosition : data) {
+            if (filteredDataPosition.getTitle().toLowerCase().contains(filter)){
+                filteredList.add(filteredDataPosition);
+            }
+        }
+
+        adapter.searchData( filteredList, filteredList.size() );
+    }
 
     @Override
     protected void onResume() {
