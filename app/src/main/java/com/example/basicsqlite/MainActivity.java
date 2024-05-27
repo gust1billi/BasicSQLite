@@ -7,6 +7,7 @@ import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,6 +37,7 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton addBtn;
 
     RecyclerView mainRV; DataRVAdapter adapter; LinearLayoutManager layoutManager;
+    SearchView searchBtn;
 
     DatabaseHelper myDB;
     List<Data> data;
@@ -57,9 +59,10 @@ public class MainActivity extends AppCompatActivity {
         if ( item.getItemId() == R.id.menu_hello ) {
             Toast.makeText(MainActivity.this, "Hello World!" , Toast.LENGTH_SHORT).show();
         } else if (item.getTitleCondensed().equals("pop")){
-            Toast.makeText(MainActivity.this, "POP!", Toast.LENGTH_SHORT).show();
 
             if (data.size()>12){
+                Toast.makeText(MainActivity.this,
+                        "POP!", Toast.LENGTH_SHORT).show();
                 myDB.popLastRow( myDB.getReadableDatabase() );
                 checkData(); adapter.popLastItem(pointer);
             } else Toast.makeText(MainActivity.this,
@@ -88,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onActivityResult(ActivityResult result) {
                     Intent resultData = result.getData();
-                    assert resultData != null;
 
                     checkData();
 

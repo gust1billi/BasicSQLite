@@ -6,7 +6,8 @@
         android:id="@+id/menu_search"
         android:title="@string/search"
         app:showAsAction="ifRoom"
-        />
+        android:icon="@drawable/ic_baseline_search_24"
+        app:actionViewClass="androidx.appcompat.widget.SearchView" />
     <item
         android:id="@+id/pop_button"
         android:title="Pop Last Item"

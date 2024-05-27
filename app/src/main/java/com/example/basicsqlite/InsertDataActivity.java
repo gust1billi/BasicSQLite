@@ -108,8 +108,11 @@ public class InsertDataActivity extends AppCompatActivity {
                     intent.putExtra("deleteGate", true);
                     intent.putExtra("position", position);
 
-                    finish();
-                } else Toast.makeText(InsertDataActivity.this, "Admin Data; Cannot delete", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(InsertDataActivity.this,
+                            "Admin Data; Cannot delete", Toast.LENGTH_SHORT).show();
+                }
+                finish();
 
                 actionBtn.setVisibility(View.INVISIBLE);
             }
