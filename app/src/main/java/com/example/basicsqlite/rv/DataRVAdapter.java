@@ -73,13 +73,16 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
         notifyItemRangeRemoved( position, position );
     }
 
-    public void searchData(List<Data> filteredList, int size) {
-        int maxSize = database.size();
-        database = filteredList;
+    public void setDataShown(List<Data> filteredList) {
+        // int maxSize = database.size();
+        database = filteredList; notifyDataSetChanged();
 
-        for (int i = 0; i < size; i++) {
-            notifyItemRemoved(maxSize - i);
-        }
+//        for (int i = 0; i < size; i++) {
+//            if (filteredList.size() != maxSize){
+//                notifyItemRemoved(filteredList.size() - i);
+//            } else notifyItemRemoved(maxSize - i);
+//
+//        }
     }
 
     public static class DataViewHolder extends RecyclerView.ViewHolder {

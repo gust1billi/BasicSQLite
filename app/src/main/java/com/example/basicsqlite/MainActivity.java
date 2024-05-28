@@ -3,20 +3,15 @@ package com.example.basicsqlite;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContract;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton addBtn;
 
     RecyclerView mainRV; DataRVAdapter adapter; LinearLayoutManager layoutManager;
-    SearchView searchBtn;
+    SearchView searchView;
 
     DatabaseHelper myDB;
     List<Data> data;
@@ -49,6 +44,25 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.main_menu, menu);
+
+        // MenuItem actionSearch = menu.findItem(R.id.menu_search);
+
+        searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String filter) {
+                if (filter.length() == 0){
+                    originalData();
+                } else filterData( filter );
+                return false;
+            }
+        });
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -68,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
             } else Toast.makeText(MainActivity.this,
                     "Admin Data - Cannot Delete", Toast.LENGTH_SHORT).show();
         }
+
 //        else if (item.getTitleCondensed().equals("prune" ) ){
 //            for (int i = 0; i < pointer; i++) {
 //                data.remove( data.size() - 1 );
@@ -113,21 +128,21 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        searchBtn = findViewById(R.id.menu_search); searchBtn.setQueryHint("Filter Data by Title");
-        searchBtn.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                return false;
-            }
-
-            @Override
-            public boolean onQueryTextChange(String filter) {
-                if (filter.length() == 0){
-                    checkData();
-                } else filterData( filter );
-                return false;
-            }
-        });
+//        searchBtn = findViewById(R.id.menu_search); searchBtn.setQueryHint("Filter Data by Title");
+//        searchBtn.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+//            @Override
+//            public boolean onQueryTextSubmit(String query) {
+//                return false;
+//            }
+//
+//            @Override
+//            public boolean onQueryTextChange(String filter) {
+//                if (filter.length() == 0){
+//                    checkData();
+//                } else filterData( filter );
+//                return false;
+//            }
+//        });
 
         addBtn = findViewById(R.id.floatingAddBtn);
         addBtn.setOnClickListener(new View.OnClickListener() {
@@ -159,7 +174,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        adapter.searchData( filteredList, filteredList.size() );
+        adapter.setDataShown( filteredList );
     }
 
     @Override
@@ -182,6 +197,11 @@ public class MainActivity extends AppCompatActivity {
     public void setPointer(int position){
         pointer = position;
     }
+
+    private void originalData() {
+        adapter.setDataShown( data );
+    }
+
 
     private void checkData(){
         Cursor cursor = myDB.readAllData(); // Reads all of SQLite data in 1 table
