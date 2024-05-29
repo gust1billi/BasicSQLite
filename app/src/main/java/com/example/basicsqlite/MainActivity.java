@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
 
         if ( item.getItemId() == R.id.menu_hello ) {
             Toast.makeText(MainActivity.this, "Hello World!" , Toast.LENGTH_SHORT).show();
+            //Toast.makeText(MainActivity.this, "Size: " + cursor.getColumnCount() , Toast.LENGTH_SHORT).show();
         } else if (item.getTitleCondensed().equals("pop")){
 
             if (data.size()>12){
@@ -179,8 +180,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        super.onResume(); checkData();
-    }
+        super.onResume(); // checkData();
+    } // CHECK DATA IS CALLED TWICE? TOO MUCH PROCESS?
 
     public void openNextActivity(Intent intent){
         nextActivityLauncher.launch(intent);
@@ -202,12 +203,13 @@ public class MainActivity extends AppCompatActivity {
         adapter.setDataShown( data );
     }
 
-
     private void checkData(){
         Cursor cursor = myDB.readAllData(); // Reads all of SQLite data in 1 table
         pointer = cursor.getCount(); data.clear();
 //        Toast.makeText(MainActivity.this, "size: " + cursor.getCount(), Toast.LENGTH_SHORT).show();
 //        Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
+        if ( cursor.getColumnCount() == 4 ) myDB.alterTable();
+        // PREPARES THE LOCATION FOR IMG TO BE SAVED IN SQLITE
 
         while (cursor.moveToNext()){
             data.add(new Data(
@@ -215,9 +217,7 @@ public class MainActivity extends AppCompatActivity {
                     cursor.getString(1),
                     cursor.getString(2),
                     cursor.getInt(3)));
-        }
-        // WILL HAVE DUPLICATED DATA ERROR, TABLE IS ALWAYS READ ALL;
-        // TEMP SOLUTION, CLEAR THEN RE ADD
-    }
+        } // TEMP SOLUTION, CLEAR THEN RE ADD. Any method to make this less time consuming?
+    } // END OF CHECK DATA FUNCTION. USED TO PUT ORIGINAL DATA FROM DB TO RECYCLER VIEW
 
 }

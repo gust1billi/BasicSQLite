@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,6 +42,7 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
         holder.title.setText( data.getTitle( ) );
         holder.desc.setText( data.getDesc( ) );
         holder.num.setText( String.valueOf( data.getNum( ) ) );
+        holder.img.setImageDrawable(null);
 
         if (holder.id.getText( ) != null){
             holder.id.setText( data.getId( ) );
@@ -74,9 +76,10 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
     }
 
     public void setDataShown(List<Data> filteredList) {
-        // int maxSize = database.size();
+//        int maxSize = database.size()  - filteredList.size();
         database = filteredList; notifyDataSetChanged();
 
+        // An Effort to not use notifyDataSetChanged. The dynamic values are too widespread
 //        for (int i = 0; i < size; i++) {
 //            if (filteredList.size() != maxSize){
 //                notifyItemRemoved(filteredList.size() - i);
@@ -86,11 +89,12 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
     }
 
     public static class DataViewHolder extends RecyclerView.ViewHolder {
-        TextView id, title, desc, num;
+        TextView id, title, desc, num; ImageView img;
 
         public DataViewHolder(@NonNull View itemView) {
             super(itemView);
 
+            img = itemView.findViewById(R.id.image_data);
             id = itemView.findViewById(R.id.rvDataId);
             title = itemView.findViewById(R.id.rvTitleValueString);
             desc = itemView.findViewById(R.id.rvDataString);

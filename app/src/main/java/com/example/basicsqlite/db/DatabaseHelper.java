@@ -12,6 +12,9 @@ import androidx.annotation.Nullable;
 
 import com.example.basicsqlite.rv.DataRVAdapter;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private final Context ctx;
@@ -21,6 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_TITLE = "data_title";
     private static final String COLUMN_DATA = "data_core";
     private static final String COLUMN_NUMBER = "data_number";
+    private static final String COLUMN_IMAGE = "data_image";
 
     private static final String DATABASE_NAME= "DataLibrary.db";
     private static final int DATABASE_VERSION= 1;
@@ -46,15 +50,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void popLastRow(SQLiteDatabase db){
-        db.execSQL("DELETE FROM " + TABLE_NAME
-                + " WHERE " + COLUMN_ID + " = "
-                + "(SELECT MAX(" + COLUMN_ID
-                + ") FROM " + TABLE_NAME + ");"
+    public void popLastRow( SQLiteDatabase db ) {
+        db.execSQL("DELETE FROM " + TABLE_NAME + " WHERE "
+                + COLUMN_ID + " = " + "(SELECT MAX(" + COLUMN_ID + ") FROM " + TABLE_NAME + ");"
         );
-
-//        DataRVAdapter adapter = rvAdapter;
-        // adapter.popLastItem(position);
     }
 
     public void updateData(String row_id, String title, String data, int num){
@@ -89,6 +88,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (db != null){
             cursor = db.rawQuery(query, null);
         }
+
         return cursor;
     }
 
@@ -103,9 +103,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     private ContentValues assignTable(String title, String data, int number){
         ContentValues values = new ContentValues();
+
         values.put(COLUMN_NUMBER, number);
         values.put(COLUMN_TITLE, title);
         values.put(COLUMN_DATA, data);
+
         return values;
+    }
+
+    public void alterTable() {
+        SQLiteDatabase db = DatabaseHelper.this.getReadableDatabase();
+        String query = "ALTER TABLE " + TABLE_NAME + " ADD " + COLUMN_IMAGE + " TEXT;";
+
+        db.execSQL(query);
     }
 }

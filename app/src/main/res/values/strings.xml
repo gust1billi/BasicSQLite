@@ -3,4 +3,6 @@
     <string name="insertData">Inserts New Data to DB</string>
     <string name="update">Update</string>
     <string name="search">Search</string>
+    <string name="image_description">Image Description</string>
+    <string name="upload_square_image">Upload Square Image</string>
 </resources>
