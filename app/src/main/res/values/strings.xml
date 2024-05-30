@@ -4,5 +4,5 @@
     <string name="update">Update</string>
     <string name="search">Search</string>
     <string name="image_description">Image Description</string>
-    <string name="upload_square_image">Upload Square Image</string>
+    <string name="upload_square_image">Upload Image</string>
 </resources>

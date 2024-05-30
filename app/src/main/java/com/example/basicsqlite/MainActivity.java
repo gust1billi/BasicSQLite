@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -82,6 +83,12 @@ public class MainActivity extends AppCompatActivity {
                 checkData(); adapter.popLastItem(pointer);
             } else Toast.makeText(MainActivity.this,
                     "Admin Data - Cannot Delete", Toast.LENGTH_SHORT).show();
+        } else if (item.getItemId() == R.id.menu_vlinear_layout){
+            printToast("a");
+        } else if (item.getItemId() == R.id.menu_hlinear_layout){
+            printToast("B");
+        } else if (item.getItemId() == R.id.menu_grid_layout){
+            printToast("C");
         }
 
 //        else if (item.getTitleCondensed().equals("prune" ) ){
@@ -129,22 +136,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        searchBtn = findViewById(R.id.menu_search); searchBtn.setQueryHint("Filter Data by Title");
-//        searchBtn.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-//            @Override
-//            public boolean onQueryTextSubmit(String query) {
-//                return false;
-//            }
-//
-//            @Override
-//            public boolean onQueryTextChange(String filter) {
-//                if (filter.length() == 0){
-//                    checkData();
-//                } else filterData( filter );
-//                return false;
-//            }
-//        });
-
         addBtn = findViewById(R.id.floatingAddBtn);
         addBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -159,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
         myDB = new DatabaseHelper(MainActivity.this);
 
         mainRV = findViewById(R.id.mainRecyclerView);  data = new ArrayList<>();
+        checkData();
 
         adapter = new DataRVAdapter(MainActivity.this, data);
 //        layoutManager = new GridLayoutManager(MainActivity.this, 2);
@@ -172,16 +164,13 @@ public class MainActivity extends AppCompatActivity {
         for (Data filteredDataPosition : data) {
             if (filteredDataPosition.getTitle().toLowerCase().contains(filter)){
                 filteredList.add(filteredDataPosition);
+            } else if (filteredDataPosition.getDesc().toLowerCase().contains(filter)){
+                filteredList.add(filteredDataPosition);
             }
         }
 
         adapter.setDataShown( filteredList );
     }
-
-    @Override
-    protected void onResume() {
-        super.onResume(); // checkData();
-    } // CHECK DATA IS CALLED TWICE? TOO MUCH PROCESS?
 
     public void openNextActivity(Intent intent){
         nextActivityLauncher.launch(intent);
@@ -206,18 +195,20 @@ public class MainActivity extends AppCompatActivity {
     private void checkData(){
         Cursor cursor = myDB.readAllData(); // Reads all of SQLite data in 1 table
         pointer = cursor.getCount(); data.clear();
-//        Toast.makeText(MainActivity.this, "size: " + cursor.getCount(), Toast.LENGTH_SHORT).show();
-//        Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
         if ( cursor.getColumnCount() == 4 ) myDB.alterTable();
         // PREPARES THE LOCATION FOR IMG TO BE SAVED IN SQLITE
 
-        while (cursor.moveToNext()){
+        while (cursor.moveToNext( ) ) {
             data.add(new Data(
                     cursor.getString(0),
                     cursor.getString(1),
                     cursor.getString(2),
                     cursor.getInt(3)));
+//            Log.e("SQLITE ID: ", cursor.getString(0)); // ID is always 1 BUG
         } // TEMP SOLUTION, CLEAR THEN RE ADD. Any method to make this less time consuming?
     } // END OF CHECK DATA FUNCTION. USED TO PUT ORIGINAL DATA FROM DB TO RECYCLER VIEW
 
+    private void printToast(String text){
+        Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+    }
 }

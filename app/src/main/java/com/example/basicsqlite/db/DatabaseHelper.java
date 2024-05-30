@@ -5,15 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.os.AsyncTask;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-
-import com.example.basicsqlite.rv.DataRVAdapter;
-
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -40,7 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 "CREATE TABLE "+ TABLE_NAME + " ("
                         + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                         + COLUMN_TITLE + " TEXT, " + COLUMN_DATA + " TEXT, "
-                        + COLUMN_NUMBER + " INTEGER);";
+                        + COLUMN_NUMBER + " INTEGER, " + COLUMN_IMAGE + " TEXT);";
         db.execSQL(query);
     }
 
@@ -56,9 +50,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         );
     }
 
-    public void updateData(String row_id, String title, String data, int num){
+    public void updateData(String row_id, String title, String data, int num, String imageUri){
         SQLiteDatabase db = DatabaseHelper.this.getWritableDatabase();
-        ContentValues values = assignTable(title, data, num);
+        ContentValues values = assignTable(title, data, num, imageUri);
 
         long result = db.update(TABLE_NAME, values, "_id=?", new String[]{row_id});
 
@@ -66,9 +60,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } else Toast.makeText(ctx, "Successfully updates", Toast.LENGTH_SHORT).show();
     }
 
-    public void addData(String title, String data, int number){
+    public void addData(String title, String data, int number, String imageUri){
         SQLiteDatabase db = DatabaseHelper.this.getWritableDatabase();
-        ContentValues values = assignTable(title, data, number);
+        ContentValues values = assignTable(title, data, number, imageUri);
 
         long result = db.insert(TABLE_NAME, null, values);
 
@@ -101,12 +95,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } else Toast.makeText(ctx, "Successfully Deleted", Toast.LENGTH_SHORT).show();
     }
 
-    private ContentValues assignTable(String title, String data, int number){
+    private ContentValues assignTable(String title, String data, int number, String imageUri){
         ContentValues values = new ContentValues();
 
         values.put(COLUMN_NUMBER, number);
         values.put(COLUMN_TITLE, title);
         values.put(COLUMN_DATA, data);
+        values.put(COLUMN_IMAGE, imageUri);
 
         return values;
     }

@@ -2,6 +2,7 @@ package com.example.basicsqlite.rv;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,17 +40,12 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
     public void onBindViewHolder(@NonNull DataViewHolder holder, int position) {
         Data data = database.get(position);
 
+        holder.id.setText( data.getId() );
         holder.title.setText( data.getTitle( ) );
         holder.desc.setText( data.getDesc( ) );
         holder.num.setText( String.valueOf( data.getNum( ) ) );
-        holder.img.setImageDrawable(null);
-
-        if (holder.id.getText( ) != null){
-            holder.id.setText( data.getId( ) );
-        } else holder.id.setText("");
 
         holder.itemView.setOnClickListener(view -> {
-            Toast.makeText(ctx, "Num: " + holder.num.getText(), Toast.LENGTH_SHORT).show();
             Intent i = new Intent(ctx, InsertDataActivity.class);
             ((MainActivity)ctx).setUpdateGate(true);
             ((MainActivity) ctx).setPointer(position);
@@ -94,8 +90,8 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
         public DataViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            img = itemView.findViewById(R.id.image_data);
             id = itemView.findViewById(R.id.rvDataId);
+            img = itemView.findViewById(R.id.image_data);
             title = itemView.findViewById(R.id.rvTitleValueString);
             desc = itemView.findViewById(R.id.rvDataString);
             num = itemView.findViewById(R.id.rvValueString);

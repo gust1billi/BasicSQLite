@@ -78,17 +78,20 @@ public class InsertDataActivity extends AppCompatActivity {
                     printToast("Input Data Required");
                 } else {
                     if (key){
-                        key = false; myDB.updateData(
+                        key = false;
+
+                        myDB.updateData(
                                 id,
                                 editTitle.getText().toString(),
                                 editData.getText().toString(),
-                                Integer.parseInt( editNumber.getText().toString())
-                        );
+                                Integer.parseInt( editNumber.getText().toString( ) ),
+                                null ); // NULL IMG Until Im sure how to put uri to string
                     } else {
                         myDB.addData(
                                 editTitle.getText().toString(),
                                 editData.getText().toString(),
-                                Integer.parseInt( editNumber.getText().toString() ) );
+                                Integer.parseInt( editNumber.getText().toString() ),
+                                null );
                     } // Add or Update Button ELIF
                     finish();
                 } // ELIF

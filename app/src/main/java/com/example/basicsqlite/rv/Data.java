@@ -1,21 +1,24 @@
 package com.example.basicsqlite.rv;
 
 public class Data {
-    String id, title, desc; int num;
+    String id, title, desc;
+    String imgUri; int num;
 
-    public Data(String title, String desc, int num) {
+    public Data(String id, String title, String desc, int num) {
         this.title = title;
         this.desc = desc;
         this.num = num;
-        this.id = String.valueOf(num);
+        this.id = id;
+        this.imgUri = null;
         //  this.id = null;
     }
 
-    public Data(String id, String title, String desc, int num) {
+    public Data(String id, String title, String desc, int num, String imageUri) {
         this.id = id;
         this.title = title;
         this.desc = desc;
         this.num = num;
+        this.imgUri = imageUri;
     }
 
     public String getId() {
@@ -48,5 +51,13 @@ public class Data {
 
     public void setNum(int num) {
         this.num = num;
+    }
+
+    public String getImgUri() {
+        return imgUri;
+    }
+
+    public void setImgUri(String imgUri) {
+        this.imgUri = imgUri;
     }
 }

@@ -20,6 +20,22 @@
         android:title="Say hello!"
         android:titleCondensed="hi"
         tools:ignore="HardcodedText" />
+    <item
+        android:id="@+id/menu_vlinear_layout"
+        android:title="Vertical Layout"
+        android:titleCondensed="hi"
+        tools:ignore="HardcodedText" />
+    <item
+        android:id="@+id/menu_hlinear_layout"
+        android:title="Horizontal Layout"
+        android:titleCondensed="hi"
+        tools:ignore="HardcodedText" />
+    <item
+        android:id="@+id/menu_grid_layout"
+        android:title="Grid Layout"
+        android:titleCondensed="hi"
+        tools:ignore="HardcodedText" />
+
 <!--    <item-->
 <!--        android:id="@+id/sweep_db"-->
 <!--        android:title="Clean the Database"-->
