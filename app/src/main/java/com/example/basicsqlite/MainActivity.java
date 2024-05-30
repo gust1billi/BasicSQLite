@@ -46,8 +46,6 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater menuInflater = getMenuInflater();
         menuInflater.inflate(R.menu.main_menu, menu);
 
-        // MenuItem actionSearch = menu.findItem(R.id.menu_search);
-
         searchView = (SearchView) menu.findItem(R.id.menu_search).getActionView();
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -70,25 +68,18 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         Cursor cursor = myDB.readAllData(); pointer = cursor.getCount();
+        int id = item.getItemId();
 
-        if ( item.getItemId() == R.id.menu_hello ) {
-            Toast.makeText(MainActivity.this, "Hello World!" , Toast.LENGTH_SHORT).show();
-            //Toast.makeText(MainActivity.this, "Size: " + cursor.getColumnCount() , Toast.LENGTH_SHORT).show();
+        if ( id == R.id.menu_hello ) {
+            printToast("Hello World!");
         } else if (item.getTitleCondensed().equals("pop")){
-
-            if (data.size()>12){
-                Toast.makeText(MainActivity.this,
-                        "POP!", Toast.LENGTH_SHORT).show();
-                myDB.popLastRow( myDB.getReadableDatabase() );
-                checkData(); adapter.popLastItem(pointer);
-            } else Toast.makeText(MainActivity.this,
-                    "Admin Data - Cannot Delete", Toast.LENGTH_SHORT).show();
-        } else if (item.getItemId() == R.id.menu_vlinear_layout){
-            printToast("a");
-        } else if (item.getItemId() == R.id.menu_hlinear_layout){
-            printToast("B");
-        } else if (item.getItemId() == R.id.menu_grid_layout){
-            printToast("C");
+            check4Deletion();
+        } else if (id == R.id.menu_vlinear_layout){
+            printToast("a"); adapter.toggleViewSwitched();
+        } else if (id == R.id.menu_hlinear_layout){
+            printToast("B"); adapter.toggleViewSwitched();
+        } else if (id == R.id.menu_grid_layout){
+            printToast("C"); adapter.toggleViewSwitched();
         }
 
 //        else if (item.getTitleCondensed().equals("prune" ) ){
@@ -103,9 +94,19 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        }
 
-        cursor.close();
+        cursor.close(); return super.onOptionsItemSelected(item);
+    }
 
-        return super.onOptionsItemSelected(item);
+    private void check4Deletion() {
+        int dataId = Integer.parseInt(data.get( data.size() - 1 ).getId());
+        if ( dataId < 22){
+            Toast.makeText(MainActivity.this,
+                    "POP!", Toast.LENGTH_SHORT).show();
+            myDB.popLastRow( myDB.getReadableDatabase() );
+
+            checkData(); adapter.popLastItem(pointer);
+        } else Toast.makeText(MainActivity.this,
+                "Admin Data - Cannot Delete", Toast.LENGTH_SHORT).show();
     }
 
     ActivityResultLauncher<Intent> nextActivityLauncher = registerForActivityResult(
@@ -113,12 +114,11 @@ public class MainActivity extends AppCompatActivity {
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    Intent resultData = result.getData();
-
-                    checkData();
+                    Intent resultData = result.getData(); // UPDATES VIEW FROM ON RESUME
 
                     if(updateGate){
-                        setUpdateGate(false); adapter.notifyItemChanged(pointer);
+                        setUpdateGate(false);
+                        adapter.notifyItemChanged( pointer );
 //                      Toast.makeText(MainActivity.this, "Boop", Toast.LENGTH_SHORT).show();
                     } else if (addGate){
                         addGate = false; adapter.notifyItemInserted(data.size() - 1 );
@@ -126,10 +126,10 @@ public class MainActivity extends AppCompatActivity {
                         adapter.notifyItemRemoved(
                                 resultData.getIntExtra("position", 0) );
                     }
-                    // else adapter.notifyDataSetChanged();
-                }
-            }
-    );
+
+                } // ON ACTIVITY RESULT
+            } // ACTIVITY RESULT CALLBACK < ACTIVITY RESULT >
+    ); // ACTIVITY RESULT LAUNCHER : REGISTER FOR ACTIVITY RESULT
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,9 +147,11 @@ public class MainActivity extends AppCompatActivity {
                 openNextActivity(intent);
             }
         });
+
         myDB = new DatabaseHelper(MainActivity.this);
 
         mainRV = findViewById(R.id.mainRecyclerView);  data = new ArrayList<>();
+
         checkData();
 
         adapter = new DataRVAdapter(MainActivity.this, data);
@@ -158,6 +160,11 @@ public class MainActivity extends AppCompatActivity {
 
         mainRV.setAdapter(adapter); mainRV.setLayoutManager(layoutManager);
     } // ON CREATE
+
+    @Override
+    protected void onResume() {
+        super.onResume(); checkData();
+    }
 
     private void filterData(String filter) {
         List<Data> filteredList = new ArrayList<>();
@@ -208,7 +215,7 @@ public class MainActivity extends AppCompatActivity {
         } // TEMP SOLUTION, CLEAR THEN RE ADD. Any method to make this less time consuming?
     } // END OF CHECK DATA FUNCTION. USED TO PUT ORIGINAL DATA FROM DB TO RECYCLER VIEW
 
-    private void printToast(String text){
+    public void printToast(String text){
         Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
     }
 }

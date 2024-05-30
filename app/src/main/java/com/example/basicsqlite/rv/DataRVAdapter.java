@@ -22,6 +22,8 @@ import java.util.List;
 public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHolder> {
     Context ctx;
 
+    Boolean isSwitched = false;
+
     public DataRVAdapter(Context ctx, List<Data> database) {
         this.ctx = ctx;
         this.database = database;
@@ -40,15 +42,20 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
     public void onBindViewHolder(@NonNull DataViewHolder holder, int position) {
         Data data = database.get(position);
 
-        holder.id.setText( data.getId() );
-        holder.title.setText( data.getTitle( ) );
+        holder.id.setText( data.getId( ) );
         holder.desc.setText( data.getDesc( ) );
+        holder.title.setText( data.getTitle( ) );
         holder.num.setText( String.valueOf( data.getNum( ) ) );
+
+        if ( data.getImgUri() == null ){
+            holder.img.setImageResource(R.drawable.default_image);
+        } else holder.img.setImageURI( Uri.parse(data.getImgUri( ) ) );
 
         holder.itemView.setOnClickListener(view -> {
             Intent i = new Intent(ctx, InsertDataActivity.class);
             ((MainActivity)ctx).setUpdateGate(true);
             ((MainActivity) ctx).setPointer(position);
+            ((MainActivity) ctx).printToast("Address: " + position);
 
             i.putExtra("key", ((MainActivity)ctx).getUpdateGate() );
             i.putExtra("title", holder.title.getText() );
@@ -72,16 +79,7 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
     }
 
     public void setDataShown(List<Data> filteredList) {
-//        int maxSize = database.size()  - filteredList.size();
         database = filteredList; notifyDataSetChanged();
-
-        // An Effort to not use notifyDataSetChanged. The dynamic values are too widespread
-//        for (int i = 0; i < size; i++) {
-//            if (filteredList.size() != maxSize){
-//                notifyItemRemoved(filteredList.size() - i);
-//            } else notifyItemRemoved(maxSize - i);
-//
-//        }
     }
 
     public static class DataViewHolder extends RecyclerView.ViewHolder {
@@ -92,9 +90,19 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
 
             id = itemView.findViewById(R.id.rvDataId);
             img = itemView.findViewById(R.id.image_data);
-            title = itemView.findViewById(R.id.rvTitleValueString);
             desc = itemView.findViewById(R.id.rvDataString);
             num = itemView.findViewById(R.id.rvValueString);
+            title = itemView.findViewById(R.id.rvTitleValueString);
         }
+    }
+
+    public Boolean getSwitched() {
+        return isSwitched;
+    }
+
+    public Boolean toggleViewSwitched() {
+        isSwitched = !isSwitched; // FALSE -> TRUE & TRUE -> FALSE
+        ((MainActivity)ctx).printToast("Switch: " + isSwitched);
+        return isSwitched;
     }
 }
