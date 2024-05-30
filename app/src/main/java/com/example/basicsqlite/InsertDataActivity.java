@@ -51,6 +51,7 @@ public class InsertDataActivity extends AppCompatActivity {
 
         actionBtn = findViewById(R.id.actionButton);
 
+        // TODO: CUSTOM DIALOG LOGIC GATE. CAMERA/GALLERY/URL
         uploadBtn = findViewById(R.id.uploadImg);
         uploadBtn.setOnClickListener(new View.OnClickListener() {
             @Override

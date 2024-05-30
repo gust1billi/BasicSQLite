@@ -8,7 +8,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,7 +21,7 @@ import java.util.List;
 public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHolder> {
     Context ctx;
 
-    Boolean isSwitched = false;
+//    Boolean isSwitched = false; int viewType = 0;
 
     public DataRVAdapter(Context ctx, List<Data> database) {
         this.ctx = ctx;
@@ -34,7 +33,10 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
     @NonNull
     @Override
     public DataViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // IF VIEW TYPE = 'H LINEAR'/'V LINEAR'/'GRID' THEN INFLATE A DIFFERENT LAYOUT?
+        // IF I WANT TO DESIGN IT
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.data_rv, parent, false);
+
         return new DataViewHolder(view);
     }
 
@@ -91,18 +93,9 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
             id = itemView.findViewById(R.id.rvDataId);
             img = itemView.findViewById(R.id.image_data);
             desc = itemView.findViewById(R.id.rvDataString);
-            num = itemView.findViewById(R.id.rvValueString);
+            num  = itemView.findViewById(R.id.rvValueString);
             title = itemView.findViewById(R.id.rvTitleValueString);
-        }
-    }
 
-    public Boolean getSwitched() {
-        return isSwitched;
-    }
-
-    public Boolean toggleViewSwitched() {
-        isSwitched = !isSwitched; // FALSE -> TRUE & TRUE -> FALSE
-        ((MainActivity)ctx).printToast("Switch: " + isSwitched);
-        return isSwitched;
-    }
+        } // END OF VIEW HOLDER'S CONSTRUCTOR
+    } // END OF VIEW HOLDER
 }
