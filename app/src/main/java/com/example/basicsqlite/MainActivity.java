@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -37,75 +38,33 @@ public class MainActivity extends AppCompatActivity {
     List<Data> data;
 
     int pointer; int rvLayoutType = 0;
-    boolean addGate = false; boolean updateGate = false;
-
-    private void check4Deletion() {
-        int dataId = Integer.parseInt(data.get( data.size() - 1 ).getId());
-        if ( dataId < 22){
-            Toast.makeText(MainActivity.this,
-                    "POP!", Toast.LENGTH_SHORT).show();
-            myDB.popLastRow( myDB.getReadableDatabase() );
-
-            checkData(); adapter.popLastItem(pointer);
-        } else Toast.makeText(MainActivity.this,
-                "Admin Data - Cannot Delete", Toast.LENGTH_SHORT).show();
-    }
+    boolean addGate = false; boolean updateGate = false; boolean deleteGate = false;
 
     ActivityResultLauncher<Intent> nextActivityLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    Intent resultData = result.getData(); // UPDATES VIEW FROM ON RESUME
+                    Intent resultData = result.getData();
+                    // assert resultData != null;
+                    checkData();
 
-                    if(updateGate){
-                        setUpdateGate(false);
-                        adapter.notifyItemChanged( pointer );
+                    if(updateGate){ // CALLED FROM ADAPTER: UPDATE GATE & POINTER
+                        Log.e("UPDATES", "IS TAKEN"); setUpdateGate(false);
+                        Log.e("Data", String.valueOf( data.get( pointer ) ) );
+                        // ERROR: ITEM CHANGED ALWAYS POINTS TO LAST ITEM. ISSUE -> ON CHECK DATA
+
+                        if (result.getResultCode() == RESULT_OK ){
+                            adapter.notifyItemChanged( pointer );
+                        } else adapter.popItemPosition(pointer, data.size());
+
                     } else if (addGate){
-                        addGate = false; adapter.notifyItemInserted(data.size() - 1 );
-                    } else if ( resultData != null
-                            && resultData.getBooleanExtra("deleteGate", false)){
-                        adapter.notifyItemRemoved(
-                                resultData.getIntExtra("position", 0) );
-                    }
-
+                        addGate = false;
+                        adapter.notifyItemInserted(data.size() - 1 );
+                    } // END OF IF GATE
                 } // ON ACTIVITY RESULT
             } // END OF ACTIVITY RESULT CALLBACK < ACTIVITY RESULT >
     ); // ACTIVITY RESULT LAUNCHER : REGISTER FOR ACTIVITY RESULT
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-
-        addBtn = findViewById(R.id.floatingAddBtn);
-        addBtn.setOnClickListener(view -> {
-            Intent intent = new Intent(MainActivity.this, InsertDataActivity.class);
-            intent.putExtra("key", updateGate);
-            addGate = true;
-
-            openNextActivity(intent);
-        });
-
-        myDB = new DatabaseHelper(MainActivity.this);
-
-        mainRV = findViewById(R.id.mainRecyclerView);  data = new ArrayList<>();
-
-        checkData();
-
-        adapter = new DataRVAdapter(MainActivity.this, data);
-//        layoutManager = new GridLayoutManager(MainActivity.this, 2);
-        layoutManager = new GridLayoutManager(MainActivity.this, 1);
-        // Using layoutManager.getSpanCount(); 1 is vertical, 2/3 is GRID
-        // Using layoutManager.getOrientation(); Horizontal Orientation = 0; Vertical Orientation = 1;
-
-        mainRV.setAdapter(adapter); mainRV.setLayoutManager(layoutManager);
-    } // ON CREATE
-
-    @Override
-    protected void onResume() {
-        super.onResume(); checkData();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -168,7 +127,6 @@ public class MainActivity extends AppCompatActivity {
             } // END OF IF SWITCH VIEW TYPE TO GRID
 
         } // END OF IF STATEMENT IN OPTIONS MENU
-
 //        else if (item.getTitleCondensed().equals("prune" ) ){
 //            for (int i = 0; i < pointer; i++) {
 //                data.remove( data.size() - 1 );
@@ -180,23 +138,61 @@ public class MainActivity extends AppCompatActivity {
 //                adapter.notifyItemRemoved(i);
 //            }
 //        }
-
         cursor.close(); return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        addBtn = findViewById(R.id.floatingAddBtn);
+        addBtn.setOnClickListener(view -> {
+            Intent intent = new Intent(MainActivity.this, InsertDataActivity.class);
+            intent.putExtra("key", updateGate); addGate = true;
+
+            openNextActivity(intent);
+        });
+
+        myDB = new DatabaseHelper(MainActivity.this);
+
+        mainRV = findViewById(R.id.mainRecyclerView);  data = new ArrayList<>();
+
+        checkData();
+
+        adapter = new DataRVAdapter(MainActivity.this, data);
+        layoutManager = new GridLayoutManager(MainActivity.this, 1);
+        // Using layoutManager.getSpanCount(); 1 is vertical, 2/3 is GRID
+        // Using layoutManager.getOrientation(); Horizontal Orientation = 0; Vertical Orientation = 1;
+
+        mainRV.setAdapter(adapter); mainRV.setLayoutManager(layoutManager);
+    } // ON CREATE
+
     private void checkData(){
         Cursor cursor = myDB.readAllData(); // Reads all of SQLite data in 1 table
-        pointer = cursor.getCount(); data.clear();
+        data.clear();
+
         if ( cursor.getColumnCount() == 4 ) myDB.alterTable();
         // PREPARES THE LOCATION FOR IMG TO BE SAVED IN SQLITE
 
         while (cursor.moveToNext( ) ) {
-            data.add(new Data(
-                    cursor.getString(0),
-                    cursor.getString(1),
-                    cursor.getString(2),
-                    cursor.getInt(3)));
-//            Log.e("SQLITE ID: ", cursor.getString(0)); // ID is always 1 BUG
+            if (cursor.getString(4) == null) {
+                // Log.e("SQLITE IMG: ", "is Empty");
+                data.add(new Data(
+                        cursor.getString(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getInt(3)));
+            } else {
+                // Log.e("SQLITE IMG", cursor.getString(4));
+                data.add(new Data(
+                        cursor.getString(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getInt(3),
+                        cursor.getString(4) ) );
+            }
+
         } // TEMP SOLUTION, CLEAR THEN RE ADD. Any method to make this less time consuming?
     } // END OF CHECK DATA FUNCTION. USED TO PUT ORIGINAL DATA FROM DB TO RECYCLER VIEW
 
@@ -211,6 +207,18 @@ public class MainActivity extends AppCompatActivity {
         }
 
         adapter.setDataShown( filteredList );
+    }
+
+    private void check4Deletion() {
+        int dataId = Integer.parseInt(data.get( data.size() - 1 ).getId());
+        if ( dataId > 22){
+            printToast("POP");
+            myDB.popLastRow( myDB.getReadableDatabase() );
+
+            data.remove( pointer - 1 );
+            adapter.popItemPosition(pointer - 1, pointer);
+        } else Toast.makeText(MainActivity.this,
+                "Admin Data - Cannot Delete", Toast.LENGTH_SHORT).show();
     }
 
     public void openNextActivity(Intent intent){

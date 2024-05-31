@@ -17,6 +17,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,7 +34,9 @@ public class InsertDataActivity extends AppCompatActivity {
 
     boolean key = false; String id; int position;
 
-    Uri uri;
+    AlertDialog.Builder builder; AlertDialog dialog;
+
+    Uri uri; String stringUri;
 
     private static final int STORAGE_PERMISSION_CODE = 100;
 
@@ -44,10 +47,17 @@ public class InsertDataActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_insert_data);
 
+        builder = new AlertDialog.Builder(InsertDataActivity.this);
+
         editTitle = findViewById(R.id.addTitle);
         editData = findViewById(R.id.addData);
         editNumber = findViewById(R.id.addNumber);
         img = findViewById(R.id.imagePreview);
+        img.setOnClickListener(view -> {
+            if ( uri == null ){
+                Log.e("URI", "is Empty");
+            } else  Log.e("URI", uri.toString());
+        });
 
         actionBtn = findViewById(R.id.actionButton);
 
@@ -56,7 +66,10 @@ public class InsertDataActivity extends AppCompatActivity {
         uploadBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                checkReadStoragePermAndGetImg();
+                // checkReadStoragePermAndGetImg();
+
+                String[] choices = {"From Gallery", "From Camera" , "By URL"};
+                imageChoiceDialog( choices );
             }
         });
 
@@ -74,32 +87,59 @@ public class InsertDataActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 DatabaseHelper myDB = new DatabaseHelper(InsertDataActivity.this);
+
+                if ( uri == null ){
+                    stringUri = null;
+                } else stringUri = uri.toString();
+
                 if (editTitle.getText().length() == 0 || editData.getText().length() == 0
                         || editNumber.getText().length() == 0){
                     printToast("Input Data Required");
                 } else {
-                    if (key){
-                        key = false;
-
+                    if (key){ // KEY TO MAKE SURE THE BUTTON UPDATES DB
                         myDB.updateData(
                                 id,
                                 editTitle.getText().toString(),
                                 editData.getText().toString(),
                                 Integer.parseInt( editNumber.getText().toString( ) ),
-                                null ); // NULL IMG Until Im sure how to put uri to string
+                                stringUri );
                     } else {
                         myDB.addData(
                                 editTitle.getText().toString(),
                                 editData.getText().toString(),
                                 Integer.parseInt( editNumber.getText().toString() ),
-                                null );
+                                stringUri );
                     } // Add or Update Button ELIF
-                    finish();
+                    setResult(RESULT_OK); finish();
                 } // ELIF
             } // ON CLICK
         }); // ACTION BUTTON ON-CLICK-LISTENER
 
     } // ON-CREATE INSERT-DATA-ACTIVITY
+
+    private void imageChoiceDialog(String[] choices){
+        builder.setTitle("Get Image Method!");
+        builder.setItems(choices, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                switch (i){
+                    case 0:
+                        // checkReadStoragePermAndGetImg();
+                        printToast("FROM GALLERY");
+                        break;
+                    case 1:
+                        printToast("FROM CAMERA");
+                        break;
+                    case 2:
+                        printToast("BY URL");
+                        break;
+                }
+            }
+        });
+
+        dialog = builder.create();
+        dialog.show();
+    }
 
     private void registerImageResultLauncher() {
         imgResultLauncher = registerForActivityResult(
@@ -161,15 +201,17 @@ public class InsertDataActivity extends AppCompatActivity {
             editData.setText(extras.getString("data"));
             id = extras.getString("id");
             position = extras.getInt("position");
+            Log.e("POSITION", String.valueOf(position));
 
             actionBtn.setText(R.string.update);
         }
     } // WHEN UPDATES
 
     private void confirmDeleteDialog(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(InsertDataActivity.this);
         builder.setTitle("Delete " + editTitle.getText() + "?");
-        builder.setTitle("Are you sure that you want to Delete" + editTitle.getText() + "?");
+        builder.setTitle("Are you sure that you want to Delete" + editTitle.getText() + "?")
+                .setNegativeButton("No", (dialogInterface, i) -> { });
+
         builder.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {
@@ -177,19 +219,17 @@ public class InsertDataActivity extends AppCompatActivity {
                     DatabaseHelper myDB = new DatabaseHelper(InsertDataActivity.this);
                     myDB.deleteOneRow(id);
 
-                    Intent intent = new Intent(InsertDataActivity.this, MainActivity.class);
-                    intent.putExtra("deleteGate", true);
-                    intent.putExtra("position", position);
+                    Intent intent =
+                            new Intent(InsertDataActivity.this, MainActivity.class);
 
+                    setResult(RESULT_CANCELED, intent); finish();
                 } else printToast("Admin Data; Cannot delete");
 
-                finish(); // actionBtn.setVisibility(View.INVISIBLE);
+                actionBtn.setVisibility(View.INVISIBLE);
             }
         });
 
-        builder.setNegativeButton("No", (dialogInterface, i) -> { });
-
-        AlertDialog dialog = builder.create();
+        dialog = builder.create();
         dialog.show();
     } // DIALOG BOX INFO
 

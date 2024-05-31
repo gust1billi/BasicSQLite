@@ -64,7 +64,6 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
             i.putExtra("data", holder.desc.getText() );
             i.putExtra("num", holder.num.getText() );
             i.putExtra("id", holder.id.getText() );
-            i.putExtra("position", position );
 
             ((MainActivity)ctx).openNextActivity(i);
         });
@@ -75,9 +74,9 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
         return database.size();
     }
 
-    public void popLastItem(int position) {
+    public void popItemPosition(int position, int max_size) {
         notifyItemRemoved( position );
-        notifyItemRangeRemoved( position, position );
+        notifyItemRangeRemoved( position, max_size );
     }
 
     public void setDataShown(List<Data> filteredList) {
