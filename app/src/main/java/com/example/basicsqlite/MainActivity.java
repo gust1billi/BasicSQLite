@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
@@ -45,22 +46,19 @@ public class MainActivity extends AppCompatActivity {
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-                    Intent resultData = result.getData();
-                    // assert resultData != null;
+//                    Intent resultData = result.getData();
+//                    assert resultData != null;
                     checkData();
 
-                    if(updateGate){ // CALLED FROM ADAPTER: UPDATE GATE & POINTER
-                        Log.e("UPDATES", "IS TAKEN"); setUpdateGate(false);
-                        Log.e("Data", String.valueOf( data.get( pointer ) ) );
-                        // ERROR: ITEM CHANGED ALWAYS POINTS TO LAST ITEM. ISSUE -> ON CHECK DATA
+                    if( updateGate ){ // CALLED FROM ADAPTER: UPDATE GATE & POINTER
+                        setUpdateGate(false);
 
                         if (result.getResultCode() == RESULT_OK ){
                             adapter.notifyItemChanged( pointer );
                         } else adapter.popItemPosition(pointer, data.size());
 
                     } else if (addGate){
-                        addGate = false;
-                        adapter.notifyItemInserted(data.size() - 1 );
+                        addGate = false; adapter.notifyItemInserted(data.size() - 1 );
                     } // END OF IF GATE
                 } // ON ACTIVITY RESULT
             } // END OF ACTIVITY RESULT CALLBACK < ACTIVITY RESULT >
@@ -100,33 +98,17 @@ public class MainActivity extends AppCompatActivity {
         } else if (item.getTitleCondensed().equals("pop")){
             check4Deletion();
         } else if (id == R.id.menu_vlinear_layout){
-
-            if (rvLayoutType == 0){
-                printToast("View Type is already Vertical");
-            } else {
-                layoutManager.setSpanCount(1); layoutManager.setOrientation(RecyclerView.VERTICAL);
-                rvLayoutType = 0;
-            } // END OF IF SWITCH VIEW TYPE TO LINEAR VERTICAL
-
+            switchLayout(0, 1, true);
         } else if (id == R.id.menu_hlinear_layout){
-
-            if (rvLayoutType == 1){
-                printToast("View Type is already Horizontal");
-            } else {
-                layoutManager.setSpanCount(1); layoutManager.setOrientation(RecyclerView.HORIZONTAL);
-                rvLayoutType = 1;
-            } // END OF IF SWITCH VIEW TYPE TO LINEAR HORIZONTAL
-
+            switchLayout(1, 1, false);
         } else if (id == R.id.menu_grid_layout){
-
-            if (rvLayoutType == 2){
-                printToast("View Type is already Grid");
-            } else {
-                layoutManager.setSpanCount(2); layoutManager.setOrientation(RecyclerView.VERTICAL);
-                rvLayoutType = 2;
-            } // END OF IF SWITCH VIEW TYPE TO GRID
-
+            switchLayout(2, 2, true);
         } // END OF IF STATEMENT IN OPTIONS MENU
+        /* Switch Layout is a function that is made because the functions of the 3 ifs are similar
+        * Type is the mode of the desired layout. It will be checked by the current layout
+        * Span is the size of the layout. Grid layout wants the layout span to be in pairs
+        * Orientation is the method of scrolling. True is Vertical, False is Horizontal
+        * */
 //        else if (item.getTitleCondensed().equals("prune" ) ){
 //            for (int i = 0; i < pointer; i++) {
 //                data.remove( data.size() - 1 );
@@ -162,8 +144,6 @@ public class MainActivity extends AppCompatActivity {
 
         adapter = new DataRVAdapter(MainActivity.this, data);
         layoutManager = new GridLayoutManager(MainActivity.this, 1);
-        // Using layoutManager.getSpanCount(); 1 is vertical, 2/3 is GRID
-        // Using layoutManager.getOrientation(); Horizontal Orientation = 0; Vertical Orientation = 1;
 
         mainRV.setAdapter(adapter); mainRV.setLayoutManager(layoutManager);
     } // ON CREATE
@@ -207,6 +187,30 @@ public class MainActivity extends AppCompatActivity {
         }
 
         adapter.setDataShown( filteredList );
+    }
+
+    private void switchLayout(int type, int span, boolean orientation){
+        if (rvLayoutType == type){
+
+            switch (rvLayoutType) {
+                case 0:
+                    printToast("View Type is already Vertical");
+                    break;
+                case 1:
+                    printToast("View Type is already Horizontal");
+                    break;
+                case 2:
+                    printToast("View Type is already Grid");
+                    break;
+            }
+
+        } else {
+            layoutManager.setSpanCount(span); rvLayoutType = type;
+
+            if (!orientation){
+                layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+            } else layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        }
     }
 
     private void check4Deletion() {

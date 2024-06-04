@@ -7,15 +7,18 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
@@ -32,15 +35,40 @@ public class InsertDataActivity extends AppCompatActivity {
     ImageView deleteBtn, img;
     Button actionBtn, uploadBtn;
 
-    boolean key = false; String id; int position;
+    boolean key = false; String id; int position, imgMethod, getRequestCameraPermission;
 
     AlertDialog.Builder builder; AlertDialog dialog;
 
     Uri uri; String stringUri;
 
     private static final int STORAGE_PERMISSION_CODE = 100;
+    private static final int REQUEST_CAMERA_PERMISSION = 1;
 
     ActivityResultLauncher<Intent> imgResultLauncher;
+
+    private void registerImageResultLauncher() {
+        imgResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if ( imgMethod == 0 ){
+                            try {
+                                uri = result.getData().getData();
+                                img.setImageURI(uri);
+                            }catch (Exception e){
+                                e.getStackTrace();
+                                printToast("No Image Selected");
+                            }
+                        } else if ( imgMethod == 1 ) {
+                            Bundle extras = result.getData().getExtras();
+
+                            Bitmap imageBitmap = (Bitmap) extras.get("data");
+                            img.setImageBitmap(imageBitmap);
+                        }
+                    }
+                });
+    } // CALLS WHEN THE USER OPENS GALLERY 4 IMG
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +141,7 @@ public class InsertDataActivity extends AppCompatActivity {
                     setResult(RESULT_OK); finish();
                 } // ELIF
             } // ON CLICK
-        }); // ACTION BUTTON ON-CLICK-LISTENER
-
+        }); // ACTION BTN CLICK-LISTENER
     } // ON-CREATE INSERT-DATA-ACTIVITY
 
     private void imageChoiceDialog(String[] choices){
@@ -124,10 +151,10 @@ public class InsertDataActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialogInterface, int i) {
                 switch (i){
                     case 0:
-                        // checkReadStoragePermAndGetImg();
-                        printToast("FROM GALLERY");
+                        checkReadStoragePermAndGetImg();
                         break;
                     case 1:
+                        checkCameraPermission();
                         printToast("FROM CAMERA");
                         break;
                     case 2:
@@ -141,21 +168,22 @@ public class InsertDataActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    private void registerImageResultLauncher() {
-        imgResultLauncher = registerForActivityResult(
-                new ActivityResultContracts.StartActivityForResult(),
-                new ActivityResultCallback<ActivityResult>() {
-            @Override
-            public void onActivityResult(ActivityResult result) {
-                try {
-                    uri = result.getData().getData();
-                    img.setImageURI(uri);
-                }catch (Exception e){
-                    e.getStackTrace();
-                    printToast("No Image Selected");
-                }
-            }
-        });
+    private void checkCameraPermission() {
+        imgMethod = REQUEST_CAMERA_PERMISSION;
+
+        getRequestCameraPermission =
+                ContextCompat.checkSelfPermission(
+                        InsertDataActivity.this, Manifest.permission.CAMERA);
+
+        if ( getRequestCameraPermission != PackageManager.PERMISSION_GRANTED ){
+            ActivityCompat.requestPermissions(InsertDataActivity.this,
+                    new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+        } else openCamera();
+    }
+
+    private void openCamera() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        imgResultLauncher.launch(intent);
     }
 
     private void checkReadStoragePermAndGetImg() {
@@ -185,9 +213,10 @@ public class InsertDataActivity extends AppCompatActivity {
     }
 
     private void pickImg() {
+        imgMethod = 0;
+
         Intent i = new Intent(Intent.ACTION_PICK);
-        i.setType("image/*");
-        imgResultLauncher.launch(i);
+        i.setType("image/*"); imgResultLauncher.launch(i);
     }
 
     // Adds the data from the card clicked to the editText on this Layout
@@ -205,7 +234,7 @@ public class InsertDataActivity extends AppCompatActivity {
 
             actionBtn.setText(R.string.update);
         }
-    } // WHEN UPDATES
+    } // WHEN THE USER ENTERS THE EDIT SPACE TO UPDATE
 
     private void confirmDeleteDialog(){
         builder.setTitle("Delete " + editTitle.getText() + "?");
@@ -222,7 +251,7 @@ public class InsertDataActivity extends AppCompatActivity {
                     Intent intent =
                             new Intent(InsertDataActivity.this, MainActivity.class);
 
-                    setResult(RESULT_CANCELED, intent); finish();
+                    setResult(RESULT_OK, intent); finish();
                 } else printToast("Admin Data; Cannot delete");
 
                 actionBtn.setVisibility(View.INVISIBLE);
