@@ -10,6 +10,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -29,6 +30,13 @@ import android.widget.Toast;
 
 import com.example.basicsqlite.db.DatabaseHelper;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 public class InsertDataActivity extends AppCompatActivity {
 
     EditText editTitle, editData, editNumber;
@@ -42,6 +50,7 @@ public class InsertDataActivity extends AppCompatActivity {
     Uri uri; String stringUri;
 
     private static final int STORAGE_PERMISSION_CODE = 100;
+    private static final int REQUEST_GALLERY_PERMISSION = 0;
     private static final int REQUEST_CAMERA_PERMISSION = 1;
 
     ActivityResultLauncher<Intent> imgResultLauncher;
@@ -56,19 +65,44 @@ public class InsertDataActivity extends AppCompatActivity {
                             try {
                                 uri = result.getData().getData();
                                 img.setImageURI(uri);
-                            }catch (Exception e){
-                                e.getStackTrace();
-                                printToast("No Image Selected");
+                            } catch (Exception e){
+                                e.getStackTrace(); printToast("No Image Selected");
                             }
                         } else if ( imgMethod == 1 ) {
                             Bundle extras = result.getData().getExtras();
 
                             Bitmap imageBitmap = (Bitmap) extras.get("data");
                             img.setImageBitmap(imageBitmap);
+
+                            try { saveBitmapToGallery( imageBitmap );
+                            } catch (Exception e){
+                                e.getStackTrace(); printToast("Image not saved");
+                            }
+                        } else if ( imgMethod == 2 ) {
+                            printToast("IMG FROM URL");
                         }
-                    }
+                    } // END OF IF STATEMENT THAT CHECKS IMG METHOD
                 });
     } // CALLS WHEN THE USER OPENS GALLERY 4 IMG
+
+    private void saveBitmapToGallery( Bitmap imageBitmap ) throws IOException {
+        String filename = getTimestampString();
+        File imageFile = new File(getExternalCacheDir(), filename + ".jpg");
+
+        FileOutputStream fos = new FileOutputStream(imageFile);
+        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+        fos.close();
+    }
+
+    private String getTimestampString() {
+        long timestamp = System.currentTimeMillis();
+        Date date = new Date(timestamp);
+
+        SimpleDateFormat dateFormat;
+        dateFormat = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.getDefault());
+
+        return dateFormat.format(date);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,6 +114,7 @@ public class InsertDataActivity extends AppCompatActivity {
         editTitle = findViewById(R.id.addTitle);
         editData = findViewById(R.id.addData);
         editNumber = findViewById(R.id.addNumber);
+
         img = findViewById(R.id.imagePreview);
         img.setOnClickListener(view -> {
             if ( uri == null ){
@@ -89,13 +124,10 @@ public class InsertDataActivity extends AppCompatActivity {
 
         actionBtn = findViewById(R.id.actionButton);
 
-        // TODO: CUSTOM DIALOG LOGIC GATE. CAMERA/GALLERY/URL
         uploadBtn = findViewById(R.id.uploadImg);
         uploadBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // checkReadStoragePermAndGetImg();
-
                 String[] choices = {"From Gallery", "From Camera" , "By URL"};
                 imageChoiceDialog( choices );
             }
@@ -155,18 +187,14 @@ public class InsertDataActivity extends AppCompatActivity {
                         break;
                     case 1:
                         checkCameraPermission();
-                        printToast("FROM CAMERA");
                         break;
                     case 2:
                         printToast("BY URL");
                         break;
                 }
             }
-        });
-
-        dialog = builder.create();
-        dialog.show();
-    }
+        }); dialog = builder.create(); dialog.show();
+    } // END OF IMAGE OBTAINING METHOD DIALOG BOX
 
     private void checkCameraPermission() {
         imgMethod = REQUEST_CAMERA_PERMISSION;
@@ -183,7 +211,11 @@ public class InsertDataActivity extends AppCompatActivity {
 
     private void openCamera() {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        imgResultLauncher.launch(intent);
+
+        try { imgResultLauncher.launch(intent);
+        } catch (ActivityNotFoundException e) {
+            Log.e("CAMERA NOT FOUND", e.getMessage( ) ); // display error state to the user
+        } // END OF TRY CATCH. THIS IS USED IF THE DEVICE DOES NOT HAVE A CAMERA
     }
 
     private void checkReadStoragePermAndGetImg() {
@@ -213,7 +245,7 @@ public class InsertDataActivity extends AppCompatActivity {
     }
 
     private void pickImg() {
-        imgMethod = 0;
+        imgMethod = REQUEST_GALLERY_PERMISSION;
 
         Intent i = new Intent(Intent.ACTION_PICK);
         i.setType("image/*"); imgResultLauncher.launch(i);
@@ -229,6 +261,7 @@ public class InsertDataActivity extends AppCompatActivity {
             editTitle.setText(extras.getString("title"));
             editData.setText(extras.getString("data"));
             id = extras.getString("id");
+
             position = extras.getInt("position");
             Log.e("POSITION", String.valueOf(position));
 
@@ -260,7 +293,7 @@ public class InsertDataActivity extends AppCompatActivity {
 
         dialog = builder.create();
         dialog.show();
-    } // DIALOG BOX INFO
+    } // END OF DELETE DIALOG BOX
 
     private void printToast(String bread) {
         Toast.makeText(InsertDataActivity.this, bread, Toast.LENGTH_SHORT).show();

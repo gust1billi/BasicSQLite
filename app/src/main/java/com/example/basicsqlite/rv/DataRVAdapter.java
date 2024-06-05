@@ -57,7 +57,6 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
             Intent i = new Intent(ctx, InsertDataActivity.class);
             ((MainActivity)ctx).setUpdateGate(true);
             ((MainActivity) ctx).setPointer(position);
-            ((MainActivity) ctx).printToast("Address: " + position);
 
             i.putExtra("key", ((MainActivity)ctx).getUpdateGate() );
             i.putExtra("title", holder.title.getText() );
