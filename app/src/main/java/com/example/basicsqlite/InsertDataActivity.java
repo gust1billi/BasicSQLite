@@ -61,37 +61,53 @@ public class InsertDataActivity extends AppCompatActivity {
                 new ActivityResultCallback<ActivityResult>() {
                     @Override
                     public void onActivityResult(ActivityResult result) {
-                        if ( imgMethod == 0 ){
-                            try {
-                                uri = result.getData().getData();
-                                img.setImageURI(uri);
-                            } catch (Exception e){
-                                e.getStackTrace(); printToast("No Image Selected");
-                            }
-                        } else if ( imgMethod == 1 ) {
-                            Bundle extras = result.getData().getExtras();
+                        if ( result.getResultCode() == RESULT_OK ){
+                            assert result.getData() != null;
 
-                            Bitmap imageBitmap = (Bitmap) extras.get("data");
-                            img.setImageBitmap(imageBitmap);
+                            switch (imgMethod){
+                                case 0 :
+                                    try {
+                                        uri = result.getData().getData(); img.setImageURI(uri);
+                                    } catch (Exception e){
+                                        e.getStackTrace(); printToast("No Image Selected");
+                                    } break;
+                                case 1 :
+                                    Bundle extras = result.getData().getExtras();
+                                    Bitmap imageBitmap = (Bitmap) extras.get("data");
 
-                            try { saveBitmapToGallery( imageBitmap );
-                            } catch (Exception e){
-                                e.getStackTrace(); printToast("Image not saved");
+                                    try {
+                                        Uri uri = saveBitmapToGallery( imageBitmap );
+                                        img.setImageURI(uri); stringUri = String.valueOf(uri);
+
+                                        printToast("Image Saved");
+                                    } catch (Exception e){
+                                        e.getStackTrace(); printToast("Image not saved");
+                                    } break;
+                                case 2 :
+                                    printToast("IMG FROM URL"); break;
                             }
-                        } else if ( imgMethod == 2 ) {
-                            printToast("IMG FROM URL");
                         }
                     } // END OF IF STATEMENT THAT CHECKS IMG METHOD
                 });
     } // CALLS WHEN THE USER OPENS GALLERY 4 IMG
 
-    private void saveBitmapToGallery( Bitmap imageBitmap ) throws IOException {
+    private Uri saveBitmapToGallery( Bitmap imageBitmap ) throws IOException {
         String filename = getTimestampString();
-        File imageFile = new File(getExternalCacheDir(), filename + ".jpg");
+        File storageDir =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+        File imageFile = new File(storageDir, filename + ".jpg");
 
         FileOutputStream fos = new FileOutputStream(imageFile);
         imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
         fos.close();
+
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        mediaScanIntent.setData(Uri.fromFile( imageFile ) );
+        sendBroadcast( mediaScanIntent );
+        Log.e("IMAGE FILE URI", String.valueOf(Uri.fromFile( imageFile ) ) );
+
+        return Uri.fromFile( imageFile );
     }
 
     private String getTimestampString() {
