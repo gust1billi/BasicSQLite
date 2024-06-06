@@ -14,7 +14,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -39,15 +38,13 @@ public class MainActivity extends AppCompatActivity {
     List<Data> data;
 
     int pointer; int rvLayoutType = 0;
-    boolean addGate = false; boolean updateGate = false; boolean deleteGate = false;
+    boolean addGate = false; boolean updateGate = false;
 
     ActivityResultLauncher<Intent> nextActivityLauncher = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
                 public void onActivityResult(ActivityResult result) {
-//                    Intent resultData = result.getData();
-//                    assert resultData != null;
                     checkData();
 
                     if( updateGate ){ // CALLED FROM ADAPTER: UPDATE GATE & POINTER
@@ -93,33 +90,17 @@ public class MainActivity extends AppCompatActivity {
         Cursor cursor = myDB.readAllData(); pointer = cursor.getCount();
         int id = item.getItemId();
 
-        if ( id == R.id.menu_hello ) {
-            printToast("Hello World!");
-        } else if (item.getTitleCondensed().equals("pop")){
-            check4Deletion();
-        } else if (id == R.id.menu_vlinear_layout){
-            switchLayout(0, 1, true);
-        } else if (id == R.id.menu_hlinear_layout){
-            switchLayout(1, 1, false);
-        } else if (id == R.id.menu_grid_layout){
-            switchLayout(2, 2, true);
+        if ( id == R.id.menu_hello ) {                      printToast("Hello World!");
+        } else if (item.getTitleCondensed().equals("pop")){ check4Deletion();
+        } else if (id == R.id.menu_vLinear_layout){ switchLayout(0, 1, true);
+        } else if (id == R.id.menu_hLinear_layout){ switchLayout(1, 1, false);
+        } else if (id == R.id.menu_grid_layout){    switchLayout(2, 2, true);
         } // END OF IF STATEMENT IN OPTIONS MENU
-        /* Switch Layout is a function that is made because the functions of the 3 ifs are similar
+        /* Switch Layout is a function that is made because the functions of the 3 if statements
         * Type is the mode of the desired layout. It will be checked by the current layout
         * Span is the size of the layout. Grid layout wants the layout span to be in pairs
         * Orientation is the method of scrolling. True is Vertical, False is Horizontal
         * */
-//        else if (item.getTitleCondensed().equals("prune" ) ){
-//            for (int i = 0; i < pointer; i++) {
-//                data.remove( data.size() - 1 );
-//                adapter.notifyItemRemoved(data.size());
-//            }
-//
-//            myDB.onUpgrade(myDB.getReadableDatabase(), 0, 0);
-//            for (int i = 0; i < pointer; i++) {
-//                adapter.notifyItemRemoved(i);
-//            }
-//        }
         cursor.close(); return super.onOptionsItemSelected(item);
     }
 
@@ -137,9 +118,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         myDB = new DatabaseHelper(MainActivity.this);
-
-        mainRV = findViewById(R.id.mainRecyclerView);  data = new ArrayList<>();
-
+        mainRV = findViewById(R.id.mainRecyclerView); data = new ArrayList<>();
         checkData();
 
         adapter = new DataRVAdapter(MainActivity.this, data);

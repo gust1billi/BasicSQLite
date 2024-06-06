@@ -63,6 +63,7 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
             i.putExtra("data", holder.desc.getText() );
             i.putExtra("num", holder.num.getText() );
             i.putExtra("id", holder.id.getText() );
+            if ( data.getImgUri() != null ) i.putExtra("uri", data.getImgUri( ) );
 
             ((MainActivity)ctx).openNextActivity(i);
         });

@@ -85,7 +85,8 @@ public class InsertDataActivity extends AppCompatActivity {
                                         e.getStackTrace(); printToast("Image not saved");
                                     } break;
                                 case 2 :
-                                    printToast("IMG FROM URL"); break;
+                                    printToast("IMG FROM URL");
+                                    break;
                             }
                         }
                     } // END OF IF STATEMENT THAT CHECKS IMG METHOD
@@ -278,6 +279,10 @@ public class InsertDataActivity extends AppCompatActivity {
             editTitle.setText(extras.getString("title"));
             editData.setText(extras.getString("data"));
             id = extras.getString("id");
+
+            if ( getIntent().hasExtra("uri" ) ){
+                img.setImageURI( Uri.parse(extras.getString("uri" ) ) );
+            } else img.setImageResource( R.drawable.default_image );
 
             position = extras.getInt("position");
             Log.e("POSITION", String.valueOf(position));
