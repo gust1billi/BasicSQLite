@@ -76,10 +76,11 @@ public class InsertDataActivity extends AppCompatActivity {
                                     Bitmap imageBitmap = (Bitmap) extras.get("data");
 
                                     try {
-                                        Uri uri = saveBitmapToGallery( imageBitmap );
+                                        uri = saveBitmapToGallery( imageBitmap );
                                         img.setImageURI(uri); stringUri = String.valueOf(uri);
 
                                         printToast("Image Saved");
+                                        Log.e("URI", stringUri);
                                     } catch (Exception e){
                                         e.getStackTrace(); printToast("Image not saved");
                                     } break;
@@ -90,35 +91,6 @@ public class InsertDataActivity extends AppCompatActivity {
                     } // END OF IF STATEMENT THAT CHECKS IMG METHOD
                 });
     } // CALLS WHEN THE USER OPENS GALLERY 4 IMG
-
-    private Uri saveBitmapToGallery( Bitmap imageBitmap ) throws IOException {
-        String filename = getTimestampString();
-        File storageDir =
-                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-
-        File imageFile = new File(storageDir, filename + ".jpg");
-
-        FileOutputStream fos = new FileOutputStream(imageFile);
-        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-        fos.close();
-
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        mediaScanIntent.setData(Uri.fromFile( imageFile ) );
-        sendBroadcast( mediaScanIntent );
-        Log.e("IMAGE FILE URI", String.valueOf(Uri.fromFile( imageFile ) ) );
-
-        return Uri.fromFile( imageFile );
-    }
-
-    private String getTimestampString() {
-        long timestamp = System.currentTimeMillis();
-        Date date = new Date(timestamp);
-
-        SimpleDateFormat dateFormat;
-        dateFormat = new SimpleDateFormat("yyyyMMdd-HH:mm:ss", Locale.getDefault());
-
-        return dateFormat.format(date);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -232,6 +204,35 @@ public class InsertDataActivity extends AppCompatActivity {
         } catch (ActivityNotFoundException e) {
             Log.e("CAMERA NOT FOUND", e.getMessage( ) ); // display error state to the user
         } // END OF TRY CATCH. THIS IS USED IF THE DEVICE DOES NOT HAVE A CAMERA
+    }
+
+    private String getTimestampString() {
+        long timestamp = System.currentTimeMillis();
+        Date date = new Date(timestamp);
+
+        SimpleDateFormat dateFormat;
+        dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss", Locale.getDefault());
+
+        return dateFormat.format(date);
+    }
+
+    private Uri saveBitmapToGallery( Bitmap imageBitmap ) throws IOException {
+        String filename = getTimestampString();
+        File storageDir =
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+
+        File imageFile = new File(storageDir, filename + ".jpg");
+
+        FileOutputStream fos = new FileOutputStream(imageFile);
+        imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+        fos.close();
+
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        mediaScanIntent.setData(Uri.fromFile( imageFile ) );
+        sendBroadcast( mediaScanIntent );
+//        Log.e("IMAGE FILE URI", String.valueOf(Uri.fromFile( imageFile ) ) );
+
+        return Uri.fromFile( imageFile );
     }
 
     private void checkReadStoragePermAndGetImg() {
