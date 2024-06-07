@@ -28,6 +28,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.example.basicsqlite.db.DatabaseHelper;
 
 import java.io.File;
@@ -67,7 +68,8 @@ public class InsertDataActivity extends AppCompatActivity {
                             switch (imgMethod){
                                 case 0 :
                                     try {
-                                        uri = result.getData().getData(); img.setImageURI(uri);
+                                        uri = result.getData().getData();
+                                        loadImage(uri);
                                     } catch (Exception e){
                                         e.getStackTrace(); printToast("No Image Selected");
                                     } break;
@@ -77,7 +79,9 @@ public class InsertDataActivity extends AppCompatActivity {
 
                                     try {
                                         uri = saveBitmapToGallery( imageBitmap );
-                                        img.setImageURI(uri); stringUri = String.valueOf(uri);
+                                        loadImage(uri);
+
+                                        stringUri = String.valueOf(uri);
 
                                         printToast("Image Saved");
                                         Log.e("URI", stringUri);
@@ -114,12 +118,9 @@ public class InsertDataActivity extends AppCompatActivity {
         actionBtn = findViewById(R.id.actionButton);
 
         uploadBtn = findViewById(R.id.uploadImg);
-        uploadBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                String[] choices = {"From Gallery", "From Camera" , "By URL"};
-                imageChoiceDialog( choices );
-            }
+        uploadBtn.setOnClickListener(view -> {
+            String[] choices = {"From Gallery", "From Camera" , "By URL"};
+            imageChoiceDialog( choices );
         });
 
         deleteBtn = findViewById(R.id.deleteBtn); deleteBtn.setVisibility(View.INVISIBLE);
@@ -266,7 +267,14 @@ public class InsertDataActivity extends AppCompatActivity {
         imgMethod = REQUEST_GALLERY_PERMISSION;
 
         Intent i = new Intent(Intent.ACTION_PICK);
-        i.setType("image/*"); imgResultLauncher.launch(i);
+        i.setType("image/*");
+
+        try { imgResultLauncher.launch(i);
+        } catch (Exception e){
+            Log.e("GET IMG ERROR", e.getMessage( ) );
+            e.printStackTrace();
+            printToast("Image Incompatible");
+        }
     }
 
     // Adds the data from the card clicked to the editText on this Layout
@@ -281,7 +289,8 @@ public class InsertDataActivity extends AppCompatActivity {
             id = extras.getString("id");
 
             if ( getIntent().hasExtra("uri" ) ){
-                img.setImageURI( Uri.parse(extras.getString("uri" ) ) );
+                loadImage( Uri.parse(extras.getString("uri" ) ) );
+//                img.setImageURI( Uri.parse(extras.getString("uri" ) ) );
             } else img.setImageResource( R.drawable.default_image );
 
             position = extras.getInt("position");
@@ -319,5 +328,12 @@ public class InsertDataActivity extends AppCompatActivity {
 
     private void printToast(String bread) {
         Toast.makeText(InsertDataActivity.this, bread, Toast.LENGTH_SHORT).show();
+    }
+
+    private void loadImage(Uri imageUri){
+        Glide.with(InsertDataActivity.this)
+                .load(imageUri)
+                .placeholder(R.drawable.default_image)
+                .into(img);
     }
 }

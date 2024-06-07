@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.basicsqlite.InsertDataActivity;
 import com.example.basicsqlite.MainActivity;
 import com.example.basicsqlite.R;
@@ -22,7 +23,6 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
     Context ctx;
 
 //    Boolean isSwitched = false; int viewType = 0;
-
     public DataRVAdapter(Context ctx, List<Data> database) {
         this.ctx = ctx;
         this.database = database;
@@ -49,9 +49,13 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
         holder.title.setText( data.getTitle( ) );
         holder.num.setText( String.valueOf( data.getNum( ) ) );
 
-        if ( data.getImgUri() == null ){
-            holder.img.setImageResource(R.drawable.default_image);
-        } else holder.img.setImageURI( Uri.parse(data.getImgUri( ) ) );
+        Glide.with(ctx)
+                .load( Uri.parse(data.getImgUri( ) ) )
+                .placeholder(R.drawable.default_image)
+                .into( holder.img );
+//        if ( data.getImgUri() == null ){
+//            holder.img.setImageResource(R.drawable.default_image);
+//        } else holder.img.setImageURI( Uri.parse(data.getImgUri( ) ) );
 
         holder.itemView.setOnClickListener(view -> {
             Intent i = new Intent(ctx, InsertDataActivity.class);
@@ -84,6 +88,7 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
     }
 
     public static class DataViewHolder extends RecyclerView.ViewHolder {
+
         TextView id, title, desc, num; ImageView img;
 
         public DataViewHolder(@NonNull View itemView) {
@@ -94,7 +99,6 @@ public class DataRVAdapter extends RecyclerView.Adapter<DataRVAdapter.DataViewHo
             desc = itemView.findViewById(R.id.rvDataString);
             num  = itemView.findViewById(R.id.rvValueString);
             title = itemView.findViewById(R.id.rvTitleValueString);
-
         } // END OF VIEW HOLDER'S CONSTRUCTOR
     } // END OF VIEW HOLDER
 }
