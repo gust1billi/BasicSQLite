@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -26,6 +27,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -222,6 +225,17 @@ public class MainActivity extends AppCompatActivity {
 
     private void originalData() {
         adapter.setDataShown( data );
+    }
+
+    private void matchURL(String imageUrlText){
+        Pattern imageUrlPattern = Pattern.compile("\\.(png|jpg|jpeg|sveg|gif)");
+
+        if (!Patterns.WEB_URL.matcher( imageUrlText ).matches( ) ){
+            // urlInputLayout.setError("input must be a URL");
+        } else if ( !imageUrlPattern.matcher( imageUrlText )
+                .find(imageUrlText.length() - 4) ) {
+            // urlInputLayout.setError("The end must be an image extension format (jpg/png)");
+        } else // urlInputLayout.setErrorEnabled(false);
     }
 
     public void printToast(String text){
