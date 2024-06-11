@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class InsertDataActivity extends AppCompatActivity {
@@ -204,7 +205,19 @@ public class InsertDataActivity extends AppCompatActivity {
 
         alert.setPositiveButton("Yes Option", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int whichButton) {
-                String urlString = edittext.getText().toString();
+
+                if ( edittext.getText().length() != 0 ) {
+                    String urlString = edittext.getText().toString();
+                    Matcher httpMatch = startOfURLPattern.matcher(urlString);
+                    Matcher imageMatch = endOfURLPattern.matcher(urlString);
+
+                    if (!httpMatch.find(0)){
+                        printToast("Input must be a URL");
+                    } else if (imageMatch.find(urlString.length() - 4 ) ){
+                        // TODO: input is correct
+                    } else printToast("Input must have image extension");
+                } else printToast("input is empty");
+
                 printToast("URL: " + urlString);
             }
         });
