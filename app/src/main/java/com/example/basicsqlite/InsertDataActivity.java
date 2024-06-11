@@ -21,6 +21,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -37,12 +38,17 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.regex.Pattern;
 
 public class InsertDataActivity extends AppCompatActivity {
 
     EditText editTitle, editData, editNumber;
     ImageView deleteBtn, img;
     Button actionBtn, uploadBtn;
+
+    Pattern startOfURLPattern = Pattern.compile(
+            "(http(s?)://www\\.){1}", Pattern.CASE_INSENSITIVE );
+    Pattern endOfURLPattern = Pattern.compile("(jpg|png|gif)");
 
     boolean key = false; String id; int position, imgMethod, getRequestCameraPermission;
 
@@ -179,12 +185,38 @@ public class InsertDataActivity extends AppCompatActivity {
                         checkCameraPermission();
                         break;
                     case 2:
-                        printToast("BY URL");
+                        getUrl();
                         break;
                 }
             }
         }); dialog = builder.create(); dialog.show();
     } // END OF IMAGE OBTAINING METHOD DIALOG BOX
+
+    private void getUrl() {
+        AlertDialog.Builder alert = new AlertDialog.Builder(this);
+        final EditText edittext = new EditText(InsertDataActivity.this);
+        edittext.setHint("Please input image URL");
+
+        alert.setMessage("Enter Your Message");
+        alert.setTitle("Enter Your Title");
+
+        alert.setView(edittext);
+
+        alert.setPositiveButton("Yes Option", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                String urlString = edittext.getText().toString();
+                printToast("URL: " + urlString);
+            }
+        });
+
+        alert.setNegativeButton("No Option", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int whichButton) {
+                // what ever you want to do with No option.
+            }
+        });
+
+        alert.show();
+    }
 
     private void checkCameraPermission() {
         imgMethod = REQUEST_CAMERA_PERMISSION;

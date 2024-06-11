@@ -27,7 +27,6 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 
 public class MainActivity extends AppCompatActivity {
@@ -173,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void switchLayout(int type, int span, boolean orientation){
         if (rvLayoutType == type){
-
             switch (rvLayoutType) {
                 case 0:
                     printToast("View Type is already Vertical");
@@ -185,7 +183,6 @@ public class MainActivity extends AppCompatActivity {
                     printToast("View Type is already Grid");
                     break;
             }
-
         } else {
             layoutManager.setSpanCount(span); rvLayoutType = type;
 
@@ -235,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
         } else if ( !imageUrlPattern.matcher( imageUrlText )
                 .find(imageUrlText.length() - 4) ) {
             // urlInputLayout.setError("The end must be an image extension format (jpg/png)");
-        } else // urlInputLayout.setErrorEnabled(false);
+        } // else urlInputLayout.setErrorEnabled(false);
     }
 
     public void printToast(String text){
